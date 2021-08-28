@@ -3,7 +3,7 @@
 const todoResolvers = {
 
     todos: async( _: never, args: any, context: Auth ) => {
-        const { username } : UserPayload = context.verify()
+        const { username, email, id } = context.verify() as UserPayload;
         
     }
 

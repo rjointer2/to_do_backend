@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 import { Response, Request } from 'express';
 import jsonwebtoken, { JwtPayload } from 'jsonwebtoken'
+import { Auth, UserPayload } from '../type';
 
 
 dotenv.config();

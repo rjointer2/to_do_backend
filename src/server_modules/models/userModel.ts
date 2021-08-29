@@ -64,4 +64,4 @@ return bcrypt.compare(password, this.password);
 
 const User = model('Users', userSchema);
 
-module.exports = User;
+export default  User;

@@ -15,7 +15,8 @@ const todoSchema = new Schema(
             required: true,
         },
         likedBy: {
-            type: String,
+            type: Schema.Types.Mixed,
+            default: {},
             required: true,
         },
         dueDate: {
@@ -27,14 +28,15 @@ const todoSchema = new Schema(
             ref: 'User'
         },
         comments: {
-            type: String,
+            type: Schema.Types.Mixed,
             required: true,
+            default: {}
         },
     },
-    { timestamps: true }
+    { timestamps: true, minimize: false },
 );
 
 
 const Todo = model('Todo', todoSchema);
 
-module.exports = Todo;
+export default Todo;

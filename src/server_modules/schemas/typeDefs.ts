@@ -4,13 +4,18 @@ const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
 
+    input KeyValuePair {
+        key: String!
+        value: String!
+    }
+
     type Auth {
         token: ID!
         user: User
     }
 
     type User {
-        _id: ID!
+        id: ID!
         email: String!
         username: String!
         password: String!
@@ -20,7 +25,7 @@ const typeDefs = gql`
     }
 
     type Comment {
-        _id: ID!
+        id: ID!
         createdBy: User
         comment: String!
         todo: Todo
@@ -28,7 +33,7 @@ const typeDefs = gql`
     }
 
     type Todo {
-        _id: ID!
+        id: ID!
         completed: Boolean
         subject: String!
         todo: String!
@@ -49,7 +54,7 @@ const typeDefs = gql`
 
     type Mutation {
         
-        addTodo( completed: Boolean, subject: String!, todo: String!, likedBy: String!, createdBy: String!, dueDate: String!, comments: String! ): Todo
+        addTodo( subject: String!, createdBy: String!, dueDate: String! todo: String! ): Todo
         addComment( createdBy: String!, comment: String!, todoID: String! ): Comment
         deleteComment( id: String ): Comment
 

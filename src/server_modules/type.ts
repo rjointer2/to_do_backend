@@ -1,6 +1,6 @@
 
 export interface Auth {
-    authenicate: ({ username, email, id } : { username: string, email: string, id: string }) => string
+    authenticate: ({ username, email, id } : UserObject) => string
     verify: Function
     endSession: Function
 }
@@ -25,10 +25,10 @@ export interface TodoObject {
 }
 
 export interface CommentObject {
-    id: string
+    [id: string]: any 
     createdBy: UserObject
     comment: string
-    todo: TodoObject
+    todoId: TodoObject
     createdAt: string
 }
 

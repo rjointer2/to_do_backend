@@ -1,12 +1,20 @@
 
-import { todos, addTodo } from '../resolvers/todoResolvers'  
+import { todos, addTodo, likeTodo, getTodoById } from '../resolvers/todoResolvers';
+import { me, sign } from '../resolvers/userResolvers';
+import { addComment, deleteComment }  from '../resolvers/commentResolvers';
 
 let resolvers = {
     Query: {
-        todos
+        me,
+        todos,
+        getTodoById
     },
     Mutation: {
-        addTodo
+        deleteComment,
+        addComment,
+        likeTodo,
+        addTodo,
+        sign
     }
 }
 

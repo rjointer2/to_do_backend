@@ -62,7 +62,7 @@ export async function getAllCommentsAssicotedWithTodoID( dictionary: CommentObje
             id: comment.id,
             createdBy: getUserById.bind( comment.createdBy),
             comment: comment.comment,
-            todo: comment.todo,
+            todoId: comment.todoId,
             createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
         }
     })

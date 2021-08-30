@@ -9,7 +9,7 @@ const commentSchema = new Schema(
         comment: {
             type: String,
         },
-        todo: {
+        todoId: {
             type: String,
         },
         

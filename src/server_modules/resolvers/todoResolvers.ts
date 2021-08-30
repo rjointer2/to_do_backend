@@ -1,15 +1,19 @@
 
+import { ApolloError } from 'apollo-server-express';
+
+import { getAllCommentsAssicotedWithTodoID, getAllUsersThatLikedTodo, getUserById } from '../helper';
 import Todo from '../models/todoModel';
+
+
 import { Auth, UserPayload, TodoObject } from '../type';
 
 export async function todos ( _: never, args: { offset: number, limit: number }, context: Auth ) {
-    const { username, email, id } = context.verify() as UserPayload;
+    const { id } = context.verify() as UserPayload;
     try {
        const todos = await Todo.find().sort({ createdAt: 'desc' }) as unknown as Array<TodoObject>
         return todos.slice(args.offset, args.limit).map(todo => {
             let liked: boolean = false;
-            const dictionary = JSON.parse(todo.likedBy);
-            if(dictionary[id]) liked = true;
+            if(todo.likedBy[id]) liked = true;
             return {
                 id: todo.id.toString(),
                 likedBy: todo.likedBy, 
@@ -21,8 +25,9 @@ export async function todos ( _: never, args: { offset: number, limit: number },
                 comment: todo.comments
             }
         })
-    } catch(err) {
-
+    } catch(error) {
+        console.log(error)
+        throw new Error('Can not query todos')
     }
 }
 
@@ -54,18 +59,46 @@ export async function getTodoById(_: never, args: TodoObject, context: Auth ) {
         if(todo.likedBy[id]) liked = true;
         return {
             completed: todo.completed,
-            likedBy: getAllUsersThatLikedTodo.bind(this, todo.likedBy, userFound), 
+            likedBy: getAllUsersThatLikedTodo(todo.likedBy), 
             _id: todo.id,
             subject: todo.subject,
             todo: todo.todo,
-            createdBy: getUserById.bind(this, todo.createdBy),
+            createdBy: getUserById(todo.createdBy),
             dueDate: todo.dueDate,
             didUserLike: liked,
             // key -> comment _id and value user _id
-            comments: getAllCommentsAssicotedWithTodoID.bind(this, todo.comments)
+            comments: getAllCommentsAssicotedWithTodoID(todo.comments)
         }
 
-    } catch (err) {
+    } catch (error) {
+        console.log(error);
+        throw new Error('can not get todo')
+    }
+}
 
+export async function likeTodo(  _: never, args: { type: string, id: TodoObject }, context: Auth ) {
+
+    const { username, id } =  context.verify();
+
+    try{ 
+        if(!id) throw new ApolloError('No User is Logged In!');
+        const todo = await Todo.findById(args.id) as unknown as TodoObject;
+
+        if( args.type === 'like' ) {
+            todo.likedBy[id] = todo.id;
+            console.log(`${username} liked ${todo.createdBy}'s post -> ${todo.subject}`);
+        }
+
+        if( args.type === 'like' ) {
+            delete todo.likedBy[id]
+            console.log(`${username} liked ${todo.createdBy}'s post -> ${todo.subject}`);
+        }
+
+        await todo.save();
+        return todo;
+
+    } catch(error) {
+        console.log(error);
+        throw new ApolloError('Can not perfomr this action: Server Error')
     }
 }

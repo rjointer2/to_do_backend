@@ -1,7 +1,6 @@
 
-
 export interface Auth {
-    authenicate: Function
+    authenicate: ({ username, email, id } : { username: string, email: string, id: string }) => string
     verify: Function
     endSession: Function
 }
@@ -9,19 +8,20 @@ export interface Auth {
 export interface UserPayload {
     username: string
     email: string
-    [id: string]: any
+    id: string
 }
 
+
 export interface TodoObject {
-    id: string
+    [id: string]: any 
     completed: boolean
-    likedBy: string 
+    likedBy: UserObject 
     subject: string
     todo: string
     createdBy: string
     dueDate: string
     didUserLike: string
-    comments: string
+    comments: CommentObject
 }
 
 export interface CommentObject {
@@ -33,7 +33,7 @@ export interface CommentObject {
 }
 
 export interface UserObject {
-    id: string 
+    [id: string]: any 
     email: string 
     username: string
     todos: any 

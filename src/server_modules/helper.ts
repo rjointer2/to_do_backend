@@ -4,9 +4,11 @@ import Todo from '../server_modules/models/todoModel';
 import User from '../server_modules/models/userModel';
 import Comment from '../server_modules/models/commentModel';
 
-import { TodoObject, UserObject } from './type';
+import moment from 'moment';
 
-export async function getUserById ( id: TodoObject ): Promise<UserObject> {
+import { CommentObject, TodoObject, UserObject } from './type';
+
+export async function getUserById ( id: string ): Promise<UserObject> {
     const user = await User.findById(id) as UserObject;
     return {
         id: user.id,
@@ -18,7 +20,7 @@ export async function getUserById ( id: TodoObject ): Promise<UserObject> {
     }
 }
 
-export async function getTodosByUserId( createdBy: UserObject ) {
+export async function getTodosByUserId( createdBy: UserObject ): Promise<TodoObject[any]> {
     const todos = await Todo.find({ createdBy }) as unknown as Array<TodoObject>;
     return todos.map(todo => {
         return {
@@ -51,10 +53,11 @@ export async function getAllUsersThatLikedTodo( likers: UserObject ) {
     
 }
 
-export const getAllCommentsAssicotedWithTodoID = async comments => {
-    // key -> comment id and value user id
-    const keys = Object.keys(JSON.parse(comments));
-    return await Comment.find({ '_id': { $in: keys } }).sort({ createdAt: 'desc'}).then(comments => comments.map(comment => {
+export async function getAllCommentsAssicotedWithTodoID( dictionary: CommentObject ) {
+
+    const keys = Object.keys(dictionary);
+    const comments = Comment.find({ "_id" : { $in: keys } }).sort({ createdAt: 'desc' }) as unknown as Array<CommentObject>;
+    return comments.map(comment => {
         return {
             id: comment.id,
             createdBy: getUserById.bind( comment.createdBy),
@@ -62,6 +65,5 @@ export const getAllCommentsAssicotedWithTodoID = async comments => {
             todo: comment.todo,
             createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
         }
-    }))
-
+    })
 }

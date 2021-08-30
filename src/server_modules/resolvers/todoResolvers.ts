@@ -44,3 +44,28 @@ export async function addTodo( _: never, args: TodoObject ) {
         throw new Error('Can not create todo!')
     }
 }
+
+export async function getTodoById(_: never, args: TodoObject, context: Auth ) {
+    const { id } = context.verify() as UserPayload;
+
+    try {
+        const todo = await Todo.findById(args.id) as unknown as TodoObject;
+        let liked: boolean = false;
+        if(todo.likedBy[id]) liked = true;
+        return {
+            completed: todo.completed,
+            likedBy: getAllUsersThatLikedTodo.bind(this, todo.likedBy, userFound), 
+            _id: todo.id,
+            subject: todo.subject,
+            todo: todo.todo,
+            createdBy: getUserById.bind(this, todo.createdBy),
+            dueDate: todo.dueDate,
+            didUserLike: liked,
+            // key -> comment _id and value user _id
+            comments: getAllCommentsAssicotedWithTodoID.bind(this, todo.comments)
+        }
+
+    } catch (err) {
+
+    }
+}

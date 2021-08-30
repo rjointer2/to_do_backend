@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+
 
 export interface Auth {
     authenicate: Function
@@ -9,7 +9,7 @@ export interface Auth {
 export interface UserPayload {
     username: string
     email: string
-    id: string
+    [id: string]: any
 }
 
 export interface TodoObject {
@@ -22,4 +22,21 @@ export interface TodoObject {
     dueDate: string
     didUserLike: string
     comments: string
+}
+
+export interface CommentObject {
+    id: string
+    createdBy: UserObject
+    comment: string
+    todo: TodoObject
+    createdAt: string
+}
+
+export interface UserObject {
+    id: string 
+    email: string 
+    username: string
+    todos: any 
+    comments: CommentObject
+    friends: UserObject 
 }

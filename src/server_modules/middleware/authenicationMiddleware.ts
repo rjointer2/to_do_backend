@@ -14,7 +14,7 @@ const expiration                                = '2h';
 
 export default function authenicationMiddleware({ req, rep }: { req: Request, rep: Response }): Auth {
     return {
-        authenicate: function({ username, email, id }) {
+        authenticate: function({ username, email, id }) {
             const payload = { username, email, id };
             const token = jsonwebtoken.sign({ data: payload }, secret as string, {expiresIn: expiration});
             req.headers.authorization = token;

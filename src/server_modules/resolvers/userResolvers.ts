@@ -7,7 +7,7 @@ import User from '../models/userModel';
 import Todo from '../models/todoModel';
 
 // helpers
-import { getTodosByUserId } from "../helper";
+import { getAllCommentsAssicotedWithTodoID, getTodosByUserId } from "../helper";
 
 // types
 import { Auth, UserObject, UserPayload } from "../type";
@@ -21,7 +21,8 @@ export async function me( _: never, _args: never, context: Auth ) {
             id: user.id,
             username: user.username,
             email: user.email,
-            todos: getTodosByUserId(user.id)
+            todos: getTodosByUserId(user.id),
+            //comments: getAllCommentsAssicotedWithTodoID(user.comments),
         }
     } catch(err) {
         throw new AuthenticationError('Authentican Error! You must be logged in!')
@@ -54,7 +55,7 @@ export async function sign( _: never, args: { type: string, password: string, em
             });
             const token = context.authenticate(user);
             return { token, user }
-        } catch (error) {
+        } catch (error: any) {
             if(error.message.includes("E11000")) {
                 console.log(error)
                 throw new ApolloError(`${args.username} is a existing username, please use an alternative.`)

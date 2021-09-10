@@ -40,7 +40,7 @@ mongoose.connect(`mongodb+srv://${process.env.UN}:${process.env.PW}@cluster0.zb3
 
 
     server.listen(_PORT, () => {
-        console.log(`🚀 Server is running with no issues, click here to open http://localhost:${_PORT}`);
+        console.log(`🚀 Server is running with no issues, click here to open http://localhost:${_PORT}/graphql`);
     });
 
 })

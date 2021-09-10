@@ -1,7 +1,6 @@
 {
   "scripts": {
-    "server": "node build/server.js",
-    "build": "tsc && npm run server"
+    "server": "tsc && node build/server.js"
   },
   "dependencies": {
     "@types/express": "^4.17.13",

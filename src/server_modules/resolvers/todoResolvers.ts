@@ -10,7 +10,8 @@ import { Auth, UserPayload, TodoObject } from '../type';
 export async function todos ( _: never, args: { offset: number, limit: number }, context: Auth ) {
     const { id } = context.verify() as UserPayload;
     try {
-       const todos = await Todo.find().sort({ createdAt: 'desc' }) as unknown as Array<TodoObject>
+        const todos = await Todo.find().sort({ createdAt: 'desc' }) as unknown as Array<TodoObject>
+        console.log(todos)
         return todos.slice(args.offset, args.limit).map(todo => {
             let liked: boolean = false;
             if(todo.likedBy[id]) liked = true;

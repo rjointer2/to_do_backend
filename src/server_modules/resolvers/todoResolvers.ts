@@ -2,15 +2,15 @@
 import { ApolloError } from 'apollo-server-express';
 
 import { getAllCommentsAssicotedWithTodoID, getAllUsersThatLikedTodo, getUserById } from '../helper';
-import Todo from '../models/todoModel';
+import Todo, { TodoSchemaInterface } from '../models/todoModel';
 
 
-import { Auth, UserPayload, TodoObject } from '../type';
+import { Auth, UserPayload } from '../type';
 
 export async function todos ( _: never, args: { offset: number, limit: number }, context: Auth ) {
     const { id } = context.verify() as UserPayload;
     try {
-        const todos = await Todo.find().sort({ createdAt: 'desc' }) as unknown as Array<TodoObject>
+        const todos = await Todo.find().sort({ createdAt: 'desc' })
         console.log(todos)
         return todos.slice(args.offset, args.limit).map(todo => {
             let liked: boolean = false;
@@ -21,7 +21,7 @@ export async function todos ( _: never, args: { offset: number, limit: number },
                 subject: todo.subject,
                 completed: todo.completed,
                 todo: todo.todo,
-                createdBy: getUserById(todo.createdBy),
+                createdBy: getUserById(todo.createdBy.toString()),
                 dueDate: todo.dueDate,
                 didUserLike: liked,
                 comment: getAllCommentsAssicotedWithTodoID(todo.comments) // no done yet
@@ -33,7 +33,7 @@ export async function todos ( _: never, args: { offset: number, limit: number },
     }
 }
 
-export async function addTodo( _: never, args: TodoObject ) {
+export async function addTodo( _: never, args: TodoSchemaInterface ) {
     console.log(args)
     const newTodo = {
         completed: false,
@@ -53,12 +53,13 @@ export async function addTodo( _: never, args: TodoObject ) {
     }
 }
 
-export async function getTodoById(_: never, args: TodoObject, context: Auth ) {
+export async function getTodoById(_: never, args: TodoSchemaInterface, context: Auth ) {
     const { id } = context.verify() as UserPayload;
 
     try {
-        const todo = await Todo.findById(args.id) as unknown as TodoObject;
+        const todo = await Todo.findById(args.id);
         let liked: boolean = false;
+        if(!todo) throw new ApolloError('Can not find todo')
         if(todo.likedBy[id]) liked = true;
         return {
             completed: todo.completed,
@@ -79,13 +80,14 @@ export async function getTodoById(_: never, args: TodoObject, context: Auth ) {
     }
 }
 
-export async function likeTodo(  _: never, args: { type: string, id: TodoObject }, context: Auth ) {
+export async function likeTodo(  _: never, args: { type: string, id: TodoSchemaInterface }, context: Auth ) {
 
     const { username, id } =  context.verify();
 
     try{ 
         if(!id) throw new ApolloError('No User is Logged In!');
-        const todo = await Todo.findById(args.id) as unknown as TodoObject;
+        const todo = await Todo.findById(args.id);
+        if(!todo) throw new ApolloError('Can not find todo with querying likes')
 
         if( args.type === 'like' ) {
             todo.likedBy[id] = todo.id;

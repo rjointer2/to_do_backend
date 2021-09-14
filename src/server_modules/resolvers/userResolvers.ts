@@ -7,28 +7,30 @@ import User, { UserSchemaDefinition } from '../models/userModel';
 import Todo from '../models/todoModel';
 
 // helpers
-import { getAllCommentsAssicotedWithTodoID, getTodosByUserId } from "../helper";
+import { getAllCommentsAssicotedWithTodoID, getTodosByUserId, isCorrectPassword } from "../helper";
 
 // types
-import { Auth, UserObject, UserPayload } from "../type";
-import { Condition } from "mongoose";
+import { Auth, UserPayload } from "../type";
+
 
 export async function me( _: never, _args: never, context: Auth ) {
+    console.log('?')
     const { id }: UserPayload = context.verify();
+    console.log(id)
     const user = await User.findById(id);
-    if(!user) throw new AuthenticationError('Authentican Error! You must be logged in!')
+    if(!user) throw new AuthenticationError('Authentican Error! You must be logged in!');
+    console.log(user.id)
     return {
         id: user.id,
         username: user.username,
         email: user.email,
-        todos: getTodosByUserId(user.id),
+        todos: getTodosByUserId(id)
         //comments: getAllCommentsAssicotedWithTodoID(user.comments),
     }
 }
 
 export async function sign( _: never, args: { type: string, password: string, username: string, email: string }, context: Auth ) {
-    const { id }: UserObject = context.verify();
-    console.log("hi")
+
     if(args.type === 'sign_out') {
         context.endSession();
     }
@@ -36,11 +38,11 @@ export async function sign( _: never, args: { type: string, password: string, us
     if( args.type === 'sign_in' ) {
         console.log(args.type)
         const user = await User.findOne({ usernme: args.username });
-        if(!user) throw new AuthenticationError('No User Found with Credentials Entered');
-        const isCorrectPassword = await user.isCorrectPassword(args.password);
-        if(!isCorrectPassword) throw new AuthenticationError('Incorrect Password was used');
+        if(!user) throw new ApolloError('No User Found with Credentials Entered');
+        const isCorrectPasswordValue = isCorrectPassword({ password: args.password, correctPassword: user.password });
+        if(!isCorrectPasswordValue) throw new AuthenticationError('Incorrect Password was used');
         // sign the user's data to a token for auth 
-        const token = context.authenticate({ username: user.username, email: user.email, id: user.id });
+        const token = context.authenticate({ username: user.username, email: user.email, id: user._id.toString() });
         // return the token and user
         return { token, user };
     }
@@ -51,7 +53,7 @@ export async function sign( _: never, args: { type: string, password: string, us
                 username: args.username, email: args.email, todos: {},
                 comments: {}, friends: {},  password: args.password
             });
-            const token = context.authenticate({ username: user.username, email: user.email, id: user.id });
+            const token = context.authenticate({ username: user.username, email: user.email, id: user._id });
             return { token, user }
         } catch (error: any) {
             if(error.message.includes("E11000")) {

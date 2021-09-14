@@ -1,10 +1,12 @@
 
 import { Schema, model } from 'mongoose';
 
-interface CommentSchemaInterface extends Document {
+export interface CommentSchemaInterface extends Document {
     createdBy: string
     comment: string
     todoId: string
+    createdAt?: string
+    id?: string
 }
 
 const commentSchema = new Schema(

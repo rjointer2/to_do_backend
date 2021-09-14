@@ -12,13 +12,13 @@ export interface UserSchema {
 }
 
 export interface UserSchemaDefinition {
+    id: string
     username: string
     email: string
-    password: string
+    password?: string
     todos: object
     comments: object
     friends: object
-    isCorrectPassword: ( x: string ) => boolean
 }
 
 const userSchema = new Schema<UserSchema>(

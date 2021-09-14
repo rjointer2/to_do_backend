@@ -9,6 +9,7 @@ export interface TodoSchemaInterface {
     dueDate: string
     createdBy: string
     comments: {[index: string]: any}
+    id: string
 }
 
 const todoSchema = new Schema(

@@ -1,6 +1,6 @@
 
 export interface Auth {
-    authenticate: ({ username, email, id } : UserObject) => string
+    authenticate: ({ username, email, id } : { username: string, email: string, id: string }) => string
     verify: Function
     endSession: Function
 }

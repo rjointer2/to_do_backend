@@ -16,14 +16,15 @@ export async function todos ( _: never, args: { offset: number, limit: number },
             let liked: boolean = false;
             if(todo.likedBy[id]) liked = true;
             return {
-                id: todo.id.toString(),
-                likedBy: todo.likedBy, 
+                id: todo.id,
+                likedBy: getAllUsersThatLikedTodo(todo.likedBy), 
                 subject: todo.subject,
+                completed: todo.completed,
                 todo: todo.todo,
-                createdBy: todo.createdBy,
+                createdBy: getUserById(todo.createdBy),
                 dueDate: todo.dueDate,
-                didUserLike: todo.didUserLike,
-                comment: todo.comments
+                didUserLike: liked,
+                comment: getAllCommentsAssicotedWithTodoID(todo.comments) // no done yet
             }
         })
     } catch(error) {
@@ -34,15 +35,16 @@ export async function todos ( _: never, args: { offset: number, limit: number },
 
 export async function addTodo( _: never, args: TodoObject ) {
     console.log(args)
+    const newTodo = {
+        completed: false,
+        subject: args.subject,
+        todo: args.todo,
+        createdBy: args.createdBy,
+        dueDate: args.dueDate,
+        didUserLike: false,
+    }
     try {
-        const todo = await Todo.create({  
-            completed: false,
-            subject: args.subject,
-            todo: args.todo,
-            createdBy: args.createdBy,
-            dueDate: args.dueDate,
-            didUserLike: false,
-        });
+        const todo = await Todo.create(newTodo);
         console.log(todo)
         return todo;
     } catch(error) {

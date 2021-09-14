@@ -2,16 +2,26 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 
-interface UserSchemaDefinition {
-    username: object,
-    email: object,
-    password: string,
-    todos: object,
-    comments: object,
-    friends: object,
+export interface UserSchema {
+    username: string
+    email: object | string
+    password: string
+    todos: object
+    comments: object
+    friends: object
 }
 
-const userSchema = new Schema<UserSchemaDefinition>(
+export interface UserSchemaDefinition {
+    username: string
+    email: string
+    password: string
+    todos: object
+    comments: object
+    friends: object
+    isCorrectPassword: ( x: string ) => boolean
+}
+
+const userSchema = new Schema<UserSchema>(
     {
         username: {
             type: String,
@@ -37,7 +47,7 @@ const userSchema = new Schema<UserSchemaDefinition>(
             ref: 'Todo'
         },
         comments: {
-            type: [String],
+            type: [Schema.Types.Mixed],
             ref: 'Comment'
         },
         friends: {
@@ -62,6 +72,6 @@ return bcrypt.compare(password, this.password);
 };
 
 
-const User = model('Users', userSchema);
+const User = model<UserSchemaDefinition>('Users', userSchema);
 
 export default  User;

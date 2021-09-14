@@ -40,8 +40,10 @@ export async function addComment( _: never, args: CommentObject, context: Auth )
 
 export async function deleteComment( _: never, args: CommentObject ) {
     // key -> comment _id and value user _id
-    const comment = await Comment.findById(args.id) as unknown as CommentObject;
-    const todo = await Todo.findById(comment.todo) as unknown as UserObject;
+    const comment = await Comment.findById(args.id);
+    if(!comment) throw new ApolloError('Comment not found...')
+    const todo = await Todo.findById(comment.todoId);
+    if(!todo) throw new ApolloError('Todo not found...')
     // is in todo model find the comment prop and search for the 
     // comment id and delete the dictionary then the comment itself
     delete todo.comments[comment.id]

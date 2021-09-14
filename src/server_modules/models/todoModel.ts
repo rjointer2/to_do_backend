@@ -1,5 +1,16 @@
 import { Schema, model } from 'mongoose';
 
+export interface TodoSchemaInterface {
+    [index: string]: any
+    completed: boolean
+    subject: string
+    todo: object
+    likeBy: boolean
+    dueDate: string
+    createdBy: string
+    comments: {[index: string]: any}
+}
+
 const todoSchema = new Schema(
     {
         completed: {
@@ -37,6 +48,6 @@ const todoSchema = new Schema(
 );
 
 
-const Todo = model('Todo', todoSchema);
+const Todo = model<TodoSchemaInterface>('Todo', todoSchema);
 
 export default Todo;

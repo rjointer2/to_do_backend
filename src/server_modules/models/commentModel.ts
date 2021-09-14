@@ -1,6 +1,12 @@
 
 import { Schema, model } from 'mongoose';
 
+interface CommentSchemaInterface extends Document {
+    createdBy: string
+    comment: string
+    todoId: string
+}
+
 const commentSchema = new Schema(
     {
         createdBy: {
@@ -18,6 +24,6 @@ const commentSchema = new Schema(
 );
 
 
-const Comment = model('Comment', commentSchema);
+const Comment = model<CommentSchemaInterface>('Comment', commentSchema);
 
 export default Comment;

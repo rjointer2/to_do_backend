@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "postinstall": "tsc && mv -i -v src build/ && rm -v -rf src",
     "build": "tsc && node build/server.js"
   },
   "dependencies": {
@@ -16,5 +17,8 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0"
+  },
+  "engines": {
+    "node": "14.17.2"
   }
 }

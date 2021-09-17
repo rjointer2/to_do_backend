@@ -26,7 +26,7 @@ const initApollo = new ApolloServer({
     typeDefs /* Type Definitions Here */,
     resolvers /* Resolvers Here */,
     context: authenicationMiddleware, /* Middleware Here */
-});
+})
 
 
 // connection to DB

@@ -1,6 +1,5 @@
 {
   "scripts": {
-    "build_server": "tsc",
     "build": "node build/server.js"
   },
   "dependencies": {

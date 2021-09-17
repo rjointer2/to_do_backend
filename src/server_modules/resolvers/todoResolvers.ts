@@ -24,7 +24,7 @@ export async function todos ( _: never, args: { offset: number, limit: number },
                 createdBy: getUserById(todo.createdBy.toString()),
                 dueDate: todo.dueDate,
                 didUserLike: liked,
-                comment: getAllCommentsAssicotedWithTodoID(todo.comments) // no done yet
+                comment: getAllCommentsAssicotedWithTodoID(todo.comments) 
             }
         })
     } catch(error) {
@@ -33,15 +33,17 @@ export async function todos ( _: never, args: { offset: number, limit: number },
     }
 }
 
-export async function addTodo( _: never, args: TodoSchemaInterface ) {
+export async function addTodo( _: never, args: TodoSchemaInterface, context: Auth ) {
+    const { id } = context.verify()
     console.log(args)
     const newTodo = {
         completed: false,
         subject: args.subject,
         todo: args.todo,
-        createdBy: args.createdBy,
+        createdBy: id,
         dueDate: args.dueDate,
         didUserLike: false,
+        comments: {}
     }
     try {
         const todo = await Todo.create(newTodo);

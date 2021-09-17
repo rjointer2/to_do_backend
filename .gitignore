@@ -4,8 +4,7 @@
 /node_modules
 
 # production
-server.js
-server_modules
+
 
 
 # misc

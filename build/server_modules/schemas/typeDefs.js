@@ -4,13 +4,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const { gql } = require('apollo-server-express');
 const typeDefs = gql `
 
-    input KeyValuePair {
-        key: String!
-        value: String!
-    }
-
     type Auth {
-        token: ID!
+        token: String!
         user: User
     }
 
@@ -25,7 +20,7 @@ const typeDefs = gql `
     }
 
     type Comment {
-        id: ID!
+        id: String!
         createdBy: User
         comment: String!
         todo: Todo
@@ -33,7 +28,7 @@ const typeDefs = gql `
     }
 
     type Todo {
-        id: ID!
+        id: String!
         completed: Boolean
         subject: String!
         todo: String!
@@ -54,7 +49,7 @@ const typeDefs = gql `
 
     type Mutation {
         
-        addTodo( subject: String!, createdBy: String!, dueDate: String! todo: String! ): Todo
+        addTodo( subject: String!, dueDate: String! todo: String! ): Todo
         addComment( createdBy: String!, comment: String!, todoID: String! ): Comment
         deleteComment( id: String ): Comment
 

@@ -25,13 +25,9 @@ function getUserById(id) {
         const user = yield userModel_1.default.findById(id);
         if (!user)
             throw new apollo_server_express_1.ApolloError('Can not find user');
+        console.log(user.id);
         return {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            todos: getTodosByUserId(user.id),
-            comments: user.comments,
-            friends: user.friends,
+            id: user.id.toString()
         };
     });
 }
@@ -45,10 +41,10 @@ function getTodosByUserId(createdBy) {
             return {
                 completed: todo.completed,
                 likedBy: getAllUsersThatLikedTodo.bind(todo.likedBy),
-                id: todo.id,
+                id: todo.id.toString(),
                 subject: todo.subject,
                 todo: todo.todo,
-                createdBy: getUserById.bind(todo.createdBy),
+                createdBy: getUserById(todo.createdBy.toString()),
                 dueDate: todo.dueDate
             };
         });

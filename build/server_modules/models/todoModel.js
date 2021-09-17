@@ -24,8 +24,7 @@ const todoSchema = new mongoose_1.Schema({
         required: true,
     },
     createdBy: {
-        type: mongoose_1.Schema.Types.Mixed,
-        ref: 'User'
+        type: String,
     },
     comments: {
         type: mongoose_1.Schema.Types.Mixed,

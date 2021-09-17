@@ -8,16 +8,12 @@ import User, { UserSchemaDefinition } from './models/userModel';
 import moment from 'moment';
 import bcrypt from 'bcrypt';
 
-export async function getUserById( id: string ): Promise<UserSchemaDefinition> {
+export async function getUserById( id: string ): Promise<any> {
     const user = await User.findById(id);
     if(!user) throw new ApolloError('Can not find user')
+    console.log(user.id)
     return {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        todos: getTodosByUserId(user.id),
-        comments: user.comments,
-        friends: user.friends,
+        id: user.id.toString()
     }
 }
 
@@ -28,10 +24,10 @@ export async function getTodosByUserId( createdBy: string ): Promise<any> {
         return {
             completed: todo.completed,
             likedBy: getAllUsersThatLikedTodo.bind(todo.likedBy),
-            id: todo.id,
+            id: todo.id.toString(),
             subject: todo.subject,
             todo: todo.todo,
-            createdBy: getUserById.bind(todo.createdBy),
+            createdBy: getUserById(todo.createdBy.toString()),
             dueDate: todo.dueDate
         }
     })
@@ -41,13 +37,12 @@ export async function getAllUsersThatLikedTodo( likers: UserSchemaDefinition ) {
 
     const keys = Object.keys(likers);
     const users = await User.find({ 'username': { $in: keys } }).sort({ createdAt: 'desc' })
-    
     return users.map(user => {
         return {
             id: user.id,
             email: user.email,
             username: user.username,
-            todos: getTodosByUserId.bind( user.id),
+            todos: getTodosByUserId.bind(user.id),
             comments: user.comments,
             friends: user.friends,
         }

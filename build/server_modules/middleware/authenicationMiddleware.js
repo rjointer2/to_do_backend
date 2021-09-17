@@ -22,7 +22,6 @@ function authenicationMiddleware({ req, rep }) {
         },
         verify: function () {
             var _a;
-            console.log(req.header.authorization);
             // if the header is falsy then return a object with user and let
             // the me query error this auth error
             if (!req.header.authorization)

@@ -24,7 +24,6 @@ export default function authenicationMiddleware({ req, rep }: { req: RequestWith
             return token;
         }, 
         verify: function(): UserPayload {
-            console.log(req.header.authorization )
             // if the header is falsy then return a object with user and let
             // the me query error this auth error
             if( !req.header.authorization ) return { username: "No User Found", email: "No Email Found", id: "No ID was found"  }

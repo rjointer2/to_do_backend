@@ -66,7 +66,7 @@ export async function getTodoById(_: never, args: TodoSchemaInterface, context: 
         return {
             completed: todo.completed,
             likedBy: getAllUsersThatLikedTodo(todo.likedBy), 
-            _id: todo.id,
+            id: todo.id,
             subject: todo.subject,
             todo: todo.todo,
             createdBy: getUserById(todo.createdBy),

@@ -84,7 +84,7 @@ function getTodoById(_, args, context) {
             return {
                 completed: todo.completed,
                 likedBy: (0, helper_1.getAllUsersThatLikedTodo)(todo.likedBy),
-                _id: todo.id,
+                id: todo.id,
                 subject: todo.subject,
                 todo: todo.todo,
                 createdBy: (0, helper_1.getUserById)(todo.createdBy),

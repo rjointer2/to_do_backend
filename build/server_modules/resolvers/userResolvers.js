@@ -27,7 +27,6 @@ function me(_, _args, context) {
         const user = yield userModel_1.default.findById(id);
         if (!user)
             throw new apollo_server_express_1.AuthenticationError('Authentican Error! You must be logged in!');
-        console.log(user.id);
         return {
             id: user.id,
             username: user.username,
@@ -52,7 +51,8 @@ function sign(_, args, context) {
             if (!isCorrectPasswordValue)
                 throw new apollo_server_express_1.AuthenticationError('Incorrect Password was used');
             // sign the user's data to a token for auth 
-            const token = context.authenticate({ username: user.username, email: user.email, id: user._id.toString() });
+            console.log(user.id, user._id, "these are ids");
+            const token = context.authenticate({ username: user.username, email: user.email, id: user.id.toString() });
             // return the token and user
             return { token, user };
         }
@@ -62,7 +62,7 @@ function sign(_, args, context) {
                     username: args.username, email: args.email, todos: {},
                     comments: {}, friends: {}, password: args.password
                 });
-                const token = context.authenticate({ username: user.username, email: user.email, id: user._id });
+                const token = context.authenticate({ username: user.username, email: user.email, id: user.id.toString() });
                 return { token, user };
             }
             catch (error) {

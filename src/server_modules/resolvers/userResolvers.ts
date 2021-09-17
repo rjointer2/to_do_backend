@@ -19,7 +19,7 @@ export async function me( _: never, _args: never, context: Auth ) {
     console.log(id)
     const user = await User.findById(id);
     if(!user) throw new AuthenticationError('Authentican Error! You must be logged in!');
-    console.log(user.id)
+
     return {
         id: user.id,
         username: user.username,
@@ -42,7 +42,8 @@ export async function sign( _: never, args: { type: string, password: string, us
         const isCorrectPasswordValue = isCorrectPassword({ password: args.password, correctPassword: user.password });
         if(!isCorrectPasswordValue) throw new AuthenticationError('Incorrect Password was used');
         // sign the user's data to a token for auth 
-        const token = context.authenticate({ username: user.username, email: user.email, id: user._id.toString() });
+        console.log(user.id, user._id, "these are ids")
+        const token = context.authenticate({ username: user.username, email: user.email, id: user.id.toString() });
         // return the token and user
         return { token, user };
     }
@@ -53,7 +54,7 @@ export async function sign( _: never, args: { type: string, password: string, us
                 username: args.username, email: args.email, todos: {},
                 comments: {}, friends: {},  password: args.password
             });
-            const token = context.authenticate({ username: user.username, email: user.email, id: user._id });
+            const token = context.authenticate({ username: user.username, email: user.email, id: user.id.toString() });
             return { token, user }
         } catch (error: any) {
             if(error.message.includes("E11000")) {

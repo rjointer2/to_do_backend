@@ -36,8 +36,7 @@ const todoSchema = new Schema(
             required: true,
         },
         createdBy: {
-            type: Schema.Types.Mixed,
-            ref: 'User'
+            type: String,
         },
         comments: {
             type: Schema.Types.Mixed,

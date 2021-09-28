@@ -28,7 +28,6 @@ const todoSchema = new Schema(
         },
         likedBy: {
             type: Schema.Types.Mixed,
-            default: {},
             required: true,
         },
         dueDate: {

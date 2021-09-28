@@ -25,7 +25,7 @@ const typeDefs = gql `
     }
 
     type Comment {
-        id: ID!
+        id: String!
         createdBy: User
         comment: String!
         todo: Todo
@@ -33,7 +33,7 @@ const typeDefs = gql `
     }
 
     type Todo {
-        id: ID!
+        id: String!
         completed: Boolean
         subject: String!
         todo: String!
@@ -42,6 +42,7 @@ const typeDefs = gql `
         dueDate: String!
         didUserLike: Boolean
         comments: [Comment]
+        createdAt: String!
     }
 
 
@@ -54,7 +55,7 @@ const typeDefs = gql `
 
     type Mutation {
         
-        addTodo( subject: String!, createdBy: String!, dueDate: String! todo: String! ): Todo
+        addTodo( subject: String!, dueDate: String! todo: String! ): Todo
         addComment( createdBy: String!, comment: String!, todoID: String! ): Comment
         deleteComment( id: String ): Comment
 

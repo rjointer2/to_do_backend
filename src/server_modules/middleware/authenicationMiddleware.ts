@@ -4,7 +4,6 @@ import { Response } from 'express';
 import jsonwebtoken, { Secret } from 'jsonwebtoken'
 import { Auth, RequestWithHeadersAuth, UserPayload } from '../type';
 
-
 dotenv.config();
 
 // set token secret and expiration date         

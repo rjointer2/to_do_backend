@@ -14,18 +14,26 @@ import { Auth, UserPayload } from "../type";
 
 
 export async function me( _: never, _args: never, context: Auth ) {
-    console.log('?')
     const { id }: UserPayload = context.verify();
-    console.log(id)
     const user = await User.findById(id);
     if(!user) throw new AuthenticationError('Authentican Error! You must be logged in!');
-    console.log(user.id)
     return {
         id: user.id,
         username: user.username,
         email: user.email,
         todos: getTodosByUserId(id)
         //comments: getAllCommentsAssicotedWithTodoID(user.comments),
+    }
+}
+
+export async function user( _: never, args: { id: string }, context: Auth ) {
+    const user = await User.findById(args.id);
+    if(!user) throw new AuthenticationError('No User Found');
+    return { 
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        todos: getTodosByUserId(user.id)
     }
 }
 

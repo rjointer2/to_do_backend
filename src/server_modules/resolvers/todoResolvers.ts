@@ -1,5 +1,6 @@
 
 import { ApolloError } from 'apollo-server-express';
+import moment from 'moment';
 
 import { getAllCommentsAssicotedWithTodoID, getAllUsersThatLikedTodo, getUserById } from '../helper';
 import Todo, { TodoSchemaInterface } from '../models/todoModel';
@@ -7,24 +8,24 @@ import Todo, { TodoSchemaInterface } from '../models/todoModel';
 
 import { Auth, UserPayload } from '../type';
 
-export async function todos ( _: never, args: { offset: number, limit: number }, context: Auth ) {
+export const todos = async ( _: never, args: { offset: number, limit: number }, context: Auth ) => {
     const { id } = context.verify() as UserPayload;
     try {
         const todos = await Todo.find().sort({ createdAt: 'desc' })
-        console.log(todos)
         return todos.slice(args.offset, args.limit).map(todo => {
             let liked: boolean = false;
             if(todo.likedBy[id]) liked = true;
             return {
-                id: todo.id,
+                id: todo.id.toString(),
                 likedBy: getAllUsersThatLikedTodo(todo.likedBy), 
                 subject: todo.subject,
                 completed: todo.completed,
                 todo: todo.todo,
-                createdBy: getUserById(todo.createdBy.toString()),
+                createdBy: getUserById.bind(this, todo.createdBy),
                 dueDate: todo.dueDate,
                 didUserLike: liked,
-                comment: getAllCommentsAssicotedWithTodoID(todo.comments) 
+                createdAt: moment(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+                comments: getAllCommentsAssicotedWithTodoID(todo.comments) 
             }
         })
     } catch(error) {
@@ -43,7 +44,8 @@ export async function addTodo( _: never, args: TodoSchemaInterface, context: Aut
         createdBy: id,
         dueDate: args.dueDate,
         didUserLike: false,
-        comments: {}
+        comments: {},
+        likedBy: {}
     }
     try {
         const todo = await Todo.create(newTodo);
@@ -55,7 +57,7 @@ export async function addTodo( _: never, args: TodoSchemaInterface, context: Aut
     }
 }
 
-export async function getTodoById(_: never, args: TodoSchemaInterface, context: Auth ) {
+export const getTodoById = async (_: never, args: TodoSchemaInterface, context: Auth ) => {
     const { id } = context.verify() as UserPayload;
 
     try {
@@ -63,19 +65,19 @@ export async function getTodoById(_: never, args: TodoSchemaInterface, context: 
         let liked: boolean = false;
         if(!todo) throw new ApolloError('Can not find todo')
         if(todo.likedBy[id]) liked = true;
+        
         return {
-            completed: todo.completed,
+            id: todo.id.toString(),
             likedBy: getAllUsersThatLikedTodo(todo.likedBy), 
-            _id: todo.id,
             subject: todo.subject,
+            completed: todo.completed,
             todo: todo.todo,
-            createdBy: getUserById(todo.createdBy),
+            createdBy: getUserById.bind(this, todo.createdBy),
             dueDate: todo.dueDate,
             didUserLike: liked,
-            // key -> comment _id and value user _id
-            comments: getAllCommentsAssicotedWithTodoID(todo.comments)
+            createdAt: moment(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            comments: getAllCommentsAssicotedWithTodoID(todo.comments) 
         }
-
     } catch (error) {
         console.log(error);
         throw new Error('can not get todo')
@@ -87,22 +89,23 @@ export async function likeTodo(  _: never, args: { type: string, id: TodoSchemaI
     const { username, id } =  context.verify();
 
     try{ 
-        if(!id) throw new ApolloError('No User is Logged In!');
+        if(id.includes("No")) throw new ApolloError('No User is Logged In!');
         const todo = await Todo.findById(args.id);
         if(!todo) throw new ApolloError('Can not find todo with querying likes')
 
         if( args.type === 'like' ) {
             todo.likedBy[id] = todo.id;
             console.log(`${username} liked ${todo.createdBy}'s post -> ${todo.subject}`);
+            console.log(todo.likedBy)
         }
 
-        if( args.type === 'like' ) {
+        if( args.type === 'unlike' ) {
             delete todo.likedBy[id]
-            console.log(`${username} liked ${todo.createdBy}'s post -> ${todo.subject}`);
+            console.log(`${username} unliked ${todo.createdBy}'s post -> ${todo.subject}`);
         }
 
-        await todo.save();
-        return todo;
+        todo.markModified("likedBy")
+        await todo.save()
 
     } catch(error) {
         console.log(error);

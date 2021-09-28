@@ -14,37 +14,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.likeTodo = exports.getTodoById = exports.addTodo = exports.todos = void 0;
 const apollo_server_express_1 = require("apollo-server-express");
+const moment_1 = __importDefault(require("moment"));
 const helper_1 = require("../helper");
 const todoModel_1 = __importDefault(require("../models/todoModel"));
-function todos(_, args, context) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { id } = context.verify();
-        try {
-            const todos = yield todoModel_1.default.find().sort({ createdAt: 'desc' });
-            console.log(todos);
-            return todos.slice(args.offset, args.limit).map(todo => {
-                let liked = false;
-                if (todo.likedBy[id])
-                    liked = true;
-                return {
-                    id: todo.id,
-                    likedBy: (0, helper_1.getAllUsersThatLikedTodo)(todo.likedBy),
-                    subject: todo.subject,
-                    completed: todo.completed,
-                    todo: todo.todo,
-                    createdBy: (0, helper_1.getUserById)(todo.createdBy.toString()),
-                    dueDate: todo.dueDate,
-                    didUserLike: liked,
-                    comment: (0, helper_1.getAllCommentsAssicotedWithTodoID)(todo.comments)
-                };
-            });
-        }
-        catch (error) {
-            console.log(error);
-            throw new Error('Can not query todos');
-        }
-    });
-}
+const todos = (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = context.verify();
+    try {
+        const todos = yield todoModel_1.default.find().sort({ createdAt: 'desc' });
+        return todos.slice(args.offset, args.limit).map(todo => {
+            let liked = false;
+            if (todo.likedBy[id])
+                liked = true;
+            return {
+                id: todo.id.toString(),
+                likedBy: (0, helper_1.getAllUsersThatLikedTodo)(todo.likedBy),
+                subject: todo.subject,
+                completed: todo.completed,
+                todo: todo.todo,
+                createdBy: helper_1.getUserById.bind(this, todo.createdBy),
+                dueDate: todo.dueDate,
+                didUserLike: liked,
+                createdAt: (0, moment_1.default)(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+                comments: (0, helper_1.getAllCommentsAssicotedWithTodoID)(todo.comments)
+            };
+        });
+    }
+    catch (error) {
+        console.log(error);
+        throw new Error('Can not query todos');
+    }
+});
 exports.todos = todos;
 function addTodo(_, args, context) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -57,7 +56,8 @@ function addTodo(_, args, context) {
             createdBy: id,
             dueDate: args.dueDate,
             didUserLike: false,
-            comments: {}
+            comments: {},
+            likedBy: {}
         };
         try {
             const todo = yield todoModel_1.default.create(newTodo);
@@ -71,41 +71,39 @@ function addTodo(_, args, context) {
     });
 }
 exports.addTodo = addTodo;
-function getTodoById(_, args, context) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { id } = context.verify();
-        try {
-            const todo = yield todoModel_1.default.findById(args.id);
-            let liked = false;
-            if (!todo)
-                throw new apollo_server_express_1.ApolloError('Can not find todo');
-            if (todo.likedBy[id])
-                liked = true;
-            return {
-                completed: todo.completed,
-                likedBy: (0, helper_1.getAllUsersThatLikedTodo)(todo.likedBy),
-                _id: todo.id,
-                subject: todo.subject,
-                todo: todo.todo,
-                createdBy: (0, helper_1.getUserById)(todo.createdBy),
-                dueDate: todo.dueDate,
-                didUserLike: liked,
-                // key -> comment _id and value user _id
-                comments: (0, helper_1.getAllCommentsAssicotedWithTodoID)(todo.comments)
-            };
-        }
-        catch (error) {
-            console.log(error);
-            throw new Error('can not get todo');
-        }
-    });
-}
+const getTodoById = (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = context.verify();
+    try {
+        const todo = yield todoModel_1.default.findById(args.id);
+        let liked = false;
+        if (!todo)
+            throw new apollo_server_express_1.ApolloError('Can not find todo');
+        if (todo.likedBy[id])
+            liked = true;
+        return {
+            id: todo.id.toString(),
+            likedBy: (0, helper_1.getAllUsersThatLikedTodo)(todo.likedBy),
+            subject: todo.subject,
+            completed: todo.completed,
+            todo: todo.todo,
+            createdBy: helper_1.getUserById.bind(this, todo.createdBy),
+            dueDate: todo.dueDate,
+            didUserLike: liked,
+            createdAt: (0, moment_1.default)(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            comments: (0, helper_1.getAllCommentsAssicotedWithTodoID)(todo.comments)
+        };
+    }
+    catch (error) {
+        console.log(error);
+        throw new Error('can not get todo');
+    }
+});
 exports.getTodoById = getTodoById;
 function likeTodo(_, args, context) {
     return __awaiter(this, void 0, void 0, function* () {
         const { username, id } = context.verify();
         try {
-            if (!id)
+            if (id.includes("No"))
                 throw new apollo_server_express_1.ApolloError('No User is Logged In!');
             const todo = yield todoModel_1.default.findById(args.id);
             if (!todo)
@@ -113,13 +111,14 @@ function likeTodo(_, args, context) {
             if (args.type === 'like') {
                 todo.likedBy[id] = todo.id;
                 console.log(`${username} liked ${todo.createdBy}'s post -> ${todo.subject}`);
+                console.log(todo.likedBy);
             }
-            if (args.type === 'like') {
+            if (args.type === 'unlike') {
                 delete todo.likedBy[id];
-                console.log(`${username} liked ${todo.createdBy}'s post -> ${todo.subject}`);
+                console.log(`${username} unliked ${todo.createdBy}'s post -> ${todo.subject}`);
             }
+            todo.markModified("likedBy");
             yield todo.save();
-            return todo;
         }
         catch (error) {
             console.log(error);

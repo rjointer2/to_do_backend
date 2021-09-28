@@ -20,66 +20,63 @@ const apollo_server_express_1 = require("apollo-server-express");
 const userModel_1 = __importDefault(require("./models/userModel"));
 const moment_1 = __importDefault(require("moment"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
-function getUserById(id) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const user = yield userModel_1.default.findById(id);
-        if (!user)
-            throw new apollo_server_express_1.ApolloError('Can not find user');
+const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield userModel_1.default.findById(id);
+    if (!user)
+        return null;
+    return {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        todos: exports.getTodosByUserId.bind(this, user.id),
+        comments: user === null || user === void 0 ? void 0 : user.comments,
+        friends: user === null || user === void 0 ? void 0 : user.friends,
+    };
+});
+exports.getUserById = getUserById;
+const getTodosByUserId = (createdBy) => __awaiter(void 0, void 0, void 0, function* () {
+    const todos = yield todoModel_1.default.find({ createdBy });
+    if (!todos)
+        throw new apollo_server_express_1.ApolloError(`Can not find todos when queried by user's id or no user was logged in...`);
+    return todos.map((todo) => {
+        return {
+            completed: todo.completed,
+            likedBy: (0, exports.getAllUsersThatLikedTodo)(todo.likedBy),
+            id: todo.id,
+            subject: todo.subject,
+            todo: todo.todo,
+            createdBy: exports.getUserById.bind(this, todo.createdBy),
+            dueDate: todo.dueDate
+        };
+    });
+});
+exports.getTodosByUserId = getTodosByUserId;
+const getAllUsersThatLikedTodo = (likers) => __awaiter(void 0, void 0, void 0, function* () {
+    const keys = Object.keys(likers);
+    if (keys.length === 0)
+        return [];
+    const users = yield userModel_1.default.find({ 'id': { $in: keys } });
+    return users.map(user => {
         return {
             id: user.id,
             email: user.email,
             username: user.username,
-            todos: getTodosByUserId(user.id),
-            comments: user.comments,
-            friends: user.friends,
+            todos: exports.getTodosByUserId.bind(this, user.id),
+            //comments: user.comments,
         };
     });
-}
-exports.getUserById = getUserById;
-function getTodosByUserId(createdBy) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const todos = yield todoModel_1.default.find({ "id": createdBy });
-        if (!todos)
-            throw new apollo_server_express_1.ApolloError(`Can not find todos when queried by user's id or no user was logged in...`);
-        return todos.map(todo => {
-            return {
-                completed: todo.completed,
-                likedBy: getAllUsersThatLikedTodo.bind(todo.likedBy),
-                id: todo.id,
-                subject: todo.subject,
-                todo: todo.todo,
-                createdBy: getUserById.bind(todo.createdBy),
-                dueDate: todo.dueDate
-            };
-        });
-    });
-}
-exports.getTodosByUserId = getTodosByUserId;
-function getAllUsersThatLikedTodo(likers) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const keys = Object.keys(likers);
-        const users = yield userModel_1.default.find({ 'username': { $in: keys } }).sort({ createdAt: 'desc' });
-        return users.map(user => {
-            return {
-                id: user.id,
-                email: user.email,
-                username: user.username,
-                todos: getTodosByUserId.bind(user.id),
-                comments: user.comments,
-                friends: user.friends,
-            };
-        });
-    });
-}
+});
 exports.getAllUsersThatLikedTodo = getAllUsersThatLikedTodo;
 function getAllCommentsAssicotedWithTodoID(dictionary) {
     return __awaiter(this, void 0, void 0, function* () {
         const keys = Object.keys(dictionary);
-        const comments = commentModel_1.default.find({ "_id": { $in: keys } }).sort({ createdAt: 'desc' });
+        if (keys.length === 0)
+            return [];
+        const comments = commentModel_1.default.find({ "id": { $in: keys } }).sort({ createdAt: 'desc' });
         return comments.map(comment => {
             return {
                 id: comment.id,
-                createdBy: getUserById.bind(comment.createdBy),
+                createdBy: (0, exports.getUserById)(comment.createdBy),
                 comment: comment.comment,
                 todoId: comment.todoId,
                 createdAt: (0, moment_1.default)(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")

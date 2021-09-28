@@ -8,48 +8,49 @@ import User, { UserSchemaDefinition } from './models/userModel';
 import moment from 'moment';
 import bcrypt from 'bcrypt';
 
-export async function getUserById( id: string ): Promise<UserSchemaDefinition> {
-    const user = await User.findById(id);
-    if(!user) throw new ApolloError('Can not find user')
+export const getUserById = async ( id: string ): Promise<any> => {
+    const user = await User.findById(id)
+    if(!user) return null;
     return {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        todos: getTodosByUserId(user.id),
-        comments: user.comments,
-        friends: user.friends,
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            todos: getTodosByUserId.bind(this, user.id),
+            comments: user?.comments,
+            friends: user?.friends,
     }
 }
 
-export async function getTodosByUserId( createdBy: string ): Promise<any> {
-    const todos = await Todo.find({ "id": createdBy}) as Array<TodoSchemaInterface> | null
+
+export const getTodosByUserId = async ( createdBy: string ): Promise<any> => {
+    const todos = await Todo.find({createdBy}) as Array<TodoSchemaInterface> | null
     if(!todos) throw new ApolloError(`Can not find todos when queried by user's id or no user was logged in...`);
-    return todos.map(todo => {
+    return todos.map((todo) => {
         return {
             completed: todo.completed,
-            likedBy: getAllUsersThatLikedTodo.bind(todo.likedBy),
+            likedBy: getAllUsersThatLikedTodo(todo.likedBy),
             id: todo.id,
             subject: todo.subject,
             todo: todo.todo,
-            createdBy: getUserById.bind(todo.createdBy),
+            createdBy: getUserById.bind(this, todo.createdBy),
             dueDate: todo.dueDate
         }
     })
 }
-
-export async function getAllUsersThatLikedTodo( likers: UserSchemaDefinition ) {
+export const getAllUsersThatLikedTodo = async ( likers: UserSchemaDefinition ): Promise<any> => {
 
     const keys = Object.keys(likers);
-    const users = await User.find({ 'username': { $in: keys } }).sort({ createdAt: 'desc' })
+    if(keys.length === 0) return []
     
+    const users = await User.find({ 'id': { $in: keys } })
+
     return users.map(user => {
         return {
             id: user.id,
             email: user.email,
             username: user.username,
-            todos: getTodosByUserId.bind( user.id),
-            comments: user.comments,
-            friends: user.friends,
+            todos: getTodosByUserId.bind(this, user.id),
+            //comments: user.comments,
         }
     }) 
     
@@ -58,11 +59,12 @@ export async function getAllUsersThatLikedTodo( likers: UserSchemaDefinition ) {
 export async function getAllCommentsAssicotedWithTodoID( dictionary: object ) {
 
     const keys = Object.keys(dictionary);
-    const comments = Comment.find({ "_id" : { $in: keys } }).sort({ createdAt: 'desc' }) as unknown as Array<CommentSchemaInterface>
+    if(keys.length === 0) return []
+    const comments = Comment.find({ "id" : { $in: keys } }).sort({ createdAt: 'desc' }) as unknown as Array<CommentSchemaInterface>
     return comments.map(comment => {
         return {
             id: comment.id,
-            createdBy: getUserById.bind( comment.createdBy),
+            createdBy: getUserById( comment.createdBy),
             comment: comment.comment,
             todoId: comment.todoId,
             createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")

@@ -16,7 +16,6 @@ const todoSchema = new mongoose_1.Schema({
     },
     likedBy: {
         type: mongoose_1.Schema.Types.Mixed,
-        default: {},
         required: true,
     },
     dueDate: {

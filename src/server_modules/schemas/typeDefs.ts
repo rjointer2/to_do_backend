@@ -48,9 +48,10 @@ const typeDefs = gql`
 
     type Query {
         me: User
-        user: ( id: String! )
+        user( id: String! ): User
         todos( offset: Int!, limit: Int! ): [Todo]
         getTodoById( id: String! ): Todo
+        getTodosById( id: String! ): [Todo]
         comments: [Comment]
     }
 
@@ -60,8 +61,14 @@ const typeDefs = gql`
         addComment( createdBy: String!, comment: String!, todoID: String! ): Comment
         deleteComment( id: String ): Comment
 
-        likeTodo( id: String!, type: String! ): Todo
+        searchUsers( value: String! ): [User]
+        searchTodos( value: String! ): [Todo]
 
+        likeTodo( id: String!, type: String! ): Todo
+        updateTodo( option: String!, id: String!, value: String! ): Todo
+        deleteTodo( id: String! ): Todo
+
+        updateUser( username: String, password: String, email: String, id: String! confirmPassword: String! ): User
         sign( username: String!, password: String!, email: String, type: String! ): Auth
     }
 

@@ -39,14 +39,20 @@ const getTodosByUserId = (createdBy) => __awaiter(void 0, void 0, void 0, functi
     if (!todos)
         throw new apollo_server_express_1.ApolloError(`Can not find todos when queried by user's id or no user was logged in...`);
     return todos.map((todo) => {
+        let liked = false;
+        if (todo.likedBy[createdBy])
+            liked = true;
         return {
+            didUserLike: liked,
             completed: todo.completed,
             likedBy: (0, exports.getAllUsersThatLikedTodo)(todo.likedBy),
             id: todo.id,
             subject: todo.subject,
             todo: todo.todo,
+            createdAt: (0, moment_1.default)(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
             createdBy: exports.getUserById.bind(this, todo.createdBy),
-            dueDate: todo.dueDate
+            dueDate: todo.dueDate,
+            comments: getAllCommentsAssicotedWithTodoID.bind(this, todo.comments)
         };
     });
 });
@@ -72,12 +78,13 @@ function getAllCommentsAssicotedWithTodoID(dictionary) {
         const keys = Object.keys(dictionary);
         if (keys.length === 0)
             return [];
+        console.log(keys);
         const comments = commentModel_1.default.find({ "id": { $in: keys } }).sort({ createdAt: 'desc' });
         return comments.map(comment => {
             return {
                 id: comment.id,
                 createdBy: (0, exports.getUserById)(comment.createdBy),
-                comment: comment.comment,
+                comments: comment.comment,
                 todoId: comment.todoId,
                 createdAt: (0, moment_1.default)(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
             };
@@ -85,9 +92,9 @@ function getAllCommentsAssicotedWithTodoID(dictionary) {
     });
 }
 exports.getAllCommentsAssicotedWithTodoID = getAllCommentsAssicotedWithTodoID;
-function isCorrectPassword({ password, correctPassword }) {
+function isCorrectPassword({ attemptPassword, correctPassword }) {
     if (!correctPassword)
         throw new apollo_server_express_1.ApolloError('No User Found with Credentials Entered');
-    return bcrypt_1.default.compare(password, correctPassword);
+    return bcrypt_1.default.compare(attemptPassword, correctPassword);
 }
 exports.isCorrectPassword = isCorrectPassword;

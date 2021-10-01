@@ -35,17 +35,13 @@ const userSchema = new mongoose_1.Schema({
         minlength: 5
     },
     todos: {
-        type: [mongoose_1.Schema.Types.Mixed],
+        type: mongoose_1.Schema.Types.Mixed,
         ref: 'Todo'
     },
     comments: {
-        type: [mongoose_1.Schema.Types.Mixed],
+        type: {},
         ref: 'Comment'
     },
-    friends: {
-        type: [mongoose_1.Schema.Types.Mixed],
-        ref: 'User'
-    }
 });
 // set up pre-save middleware to create password
 userSchema.pre('save', function (next) {
@@ -57,11 +53,5 @@ userSchema.pre('save', function (next) {
         next();
     });
 });
-// compare the incoming password with the hashed password
-userSchema.methods.isCorrectPassword = function (password) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return bcrypt_1.default.compare(password, this.password);
-    });
-};
 const User = (0, mongoose_1.model)('Users', userSchema);
 exports.default = User;

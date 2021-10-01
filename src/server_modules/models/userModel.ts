@@ -8,17 +8,16 @@ export interface UserSchema {
     password: string
     todos: object
     comments: object
-    friends: object
 }
 
 export interface UserSchemaDefinition {
+    [index: string]: any
     id: string
     username: string
     email: string
     password?: string
-    todos: object
+    todos: { [index: string]: any }
     comments: object
-    friends: object
 }
 
 const userSchema = new Schema<UserSchema>(
@@ -43,17 +42,14 @@ const userSchema = new Schema<UserSchema>(
             minlength: 5
         },
         todos: {
-            type: [Schema.Types.Mixed],
+            type: Schema.Types.Mixed,
             ref: 'Todo'
         },
         comments: {
-            type: [Schema.Types.Mixed],
+            type: {},
             ref: 'Comment'
         },
-        friends: {
-            type: [Schema.Types.Mixed],
-            ref: 'User'
-        }
+
     }
 );
 
@@ -65,12 +61,6 @@ userSchema.pre('save', async function(next): Promise<void> {
     }
     next();
 });
-  
-// compare the incoming password with the hashed password
-userSchema.methods.isCorrectPassword = async function(password: string): Promise<boolean> {
-return bcrypt.compare(password, this.password);
-};
-
 
 const User = model<UserSchemaDefinition>('Users', userSchema);
 

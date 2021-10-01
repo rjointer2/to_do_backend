@@ -37,7 +37,7 @@ function addComment(_, args, context) {
         yield todo.save();
         console.log(comment);
         return {
-            _id: comment.id,
+            id: comment.id,
             createdBy: comment.createdBy,
             comment: comment.comment,
             todo: comment.todoId

@@ -12,39 +12,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.likeTodo = exports.getTodoById = exports.addTodo = exports.todos = void 0;
+exports.deleteTodo = exports.updateTodo = exports.likeTodo = exports.getTodoById = exports.addTodo = exports.searchTodos = exports.todos = void 0;
 const apollo_server_express_1 = require("apollo-server-express");
 const moment_1 = __importDefault(require("moment"));
 const helper_1 = require("../helper");
 const todoModel_1 = __importDefault(require("../models/todoModel"));
+const userModel_1 = __importDefault(require("../models/userModel"));
 const todos = (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = context.verify();
-    try {
-        const todos = yield todoModel_1.default.find().sort({ createdAt: 'desc' });
-        return todos.slice(args.offset, args.limit).map(todo => {
-            let liked = false;
-            if (todo.likedBy[id])
-                liked = true;
-            return {
-                id: todo.id.toString(),
-                likedBy: (0, helper_1.getAllUsersThatLikedTodo)(todo.likedBy),
-                subject: todo.subject,
-                completed: todo.completed,
-                todo: todo.todo,
-                createdBy: helper_1.getUserById.bind(this, todo.createdBy),
-                dueDate: todo.dueDate,
-                didUserLike: liked,
-                createdAt: (0, moment_1.default)(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
-                comments: (0, helper_1.getAllCommentsAssicotedWithTodoID)(todo.comments)
-            };
-        });
-    }
-    catch (error) {
-        console.log(error);
-        throw new Error('Can not query todos');
-    }
+    const todos = yield todoModel_1.default.find().sort({ createdAt: 'desc' });
+    if (!todos)
+        throw new apollo_server_express_1.ApolloError('Can not query todos');
+    return todos.slice(args.offset, args.limit).map(todo => {
+        return {
+            id: todo.id.toString(),
+            likedBy: (0, helper_1.getAllUsersThatLikedTodo)(todo.likedBy),
+            subject: todo.subject,
+            completed: todo.completed,
+            todo: todo.todo,
+            createdBy: helper_1.getUserById.bind(this, todo.createdBy),
+            dueDate: todo.dueDate,
+            didUserLike: todo.likedBy[id] ? true : false,
+            createdAt: (0, moment_1.default)(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            comments: (0, helper_1.getAllCommentsAssicotedWithTodoID)(todo.comments)
+        };
+    });
 });
 exports.todos = todos;
+const searchTodos = (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = context.verify();
+    const todos = yield todoModel_1.default.find({ "subject": { $regex: args.value } });
+    if (!todos)
+        throw new apollo_server_express_1.ApolloError('Server error when querying all Todos...');
+    return todos.map(todo => {
+        return {
+            id: todo.id.toString(),
+            likedBy: (0, helper_1.getAllUsersThatLikedTodo)(todo.likedBy),
+            subject: todo.subject,
+            completed: todo.completed,
+            todo: todo.todo,
+            createdBy: helper_1.getUserById.bind(this, todo.createdBy),
+            dueDate: todo.dueDate,
+            didUserLike: todo.likedBy[id] ? true : false,
+            createdAt: (0, moment_1.default)(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            comments: (0, helper_1.getAllCommentsAssicotedWithTodoID)(todo.comments)
+        };
+    });
+});
+exports.searchTodos = searchTodos;
 function addTodo(_, args, context) {
     return __awaiter(this, void 0, void 0, function* () {
         const { id } = context.verify();
@@ -59,15 +74,18 @@ function addTodo(_, args, context) {
             comments: {},
             likedBy: {}
         };
-        try {
-            const todo = yield todoModel_1.default.create(newTodo);
-            console.log(todo);
-            return todo;
+        const user = yield userModel_1.default.findById(id);
+        if (!user) {
+            throw new apollo_server_express_1.ApolloError('Can not find user when adding Todo, todo creation exited was exited');
         }
-        catch (error) {
-            console.log(error);
-            throw new Error('Can not create todo!');
-        }
+        const todo = yield todoModel_1.default.create(newTodo);
+        console.log(todo);
+        if (!todo)
+            throw new apollo_server_express_1.ApolloError('Cannot make a todo...');
+        user.todos[todo.id] = todo.todo;
+        user.markModified("todos");
+        yield user.save();
+        return todo;
     });
 }
 exports.addTodo = addTodo;
@@ -127,3 +145,41 @@ function likeTodo(_, args, context) {
     });
 }
 exports.likeTodo = likeTodo;
+const updateTodo = (_, args) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/");
+    const todo = yield todoModel_1.default.findById(args.id);
+    if (!todo) {
+        console.log("Can not find todo at updateTodo resolver");
+        throw new apollo_server_express_1.ApolloError("Can not find todo...");
+    }
+    if (args.option in todo) {
+        todo[args.option] = args.value;
+        yield todo.save();
+        console.log(todo);
+        return {
+            id: todo.id
+        };
+    }
+    throw new apollo_server_express_1.ApolloError(`${args.option} is not a valid option in the proptery of the todo schema...`);
+});
+exports.updateTodo = updateTodo;
+const deleteTodo = (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = context.verify();
+    const user = yield userModel_1.default.findById(id);
+    if (!user)
+        throw new apollo_server_express_1.ApolloError('Can not find user when deleting todo, action exited');
+    const todo = yield todoModel_1.default.findByIdAndDelete(args.id);
+    if (!todo) {
+        console.log("Can not find todo at deleteTodo resolver");
+        throw new apollo_server_express_1.ApolloError("Can not find todo...");
+    }
+    delete user.todos[todo.id];
+    user.markModified("todos");
+    yield user.save();
+    return {
+        id: todo.id,
+        subject: todo.subject,
+        todo: todo.todo,
+    };
+});
+exports.deleteTodo = deleteTodo;

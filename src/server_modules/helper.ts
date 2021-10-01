@@ -26,14 +26,19 @@ export const getTodosByUserId = async ( createdBy: string ): Promise<any> => {
     const todos = await Todo.find({createdBy}) as Array<TodoSchemaInterface> | null
     if(!todos) throw new ApolloError(`Can not find todos when queried by user's id or no user was logged in...`);
     return todos.map((todo) => {
+        let liked: boolean = false;
+        if(todo.likedBy[createdBy]) liked = true;
         return {
+            didUserLike: liked,
             completed: todo.completed,
             likedBy: getAllUsersThatLikedTodo(todo.likedBy),
             id: todo.id,
             subject: todo.subject,
             todo: todo.todo,
+            createdAt: moment(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
             createdBy: getUserById.bind(this, todo.createdBy),
-            dueDate: todo.dueDate
+            dueDate: todo.dueDate,
+            comments: getAllCommentsAssicotedWithTodoID.bind(this, todo.comments)
         }
     })
 }
@@ -60,19 +65,20 @@ export async function getAllCommentsAssicotedWithTodoID( dictionary: object ) {
 
     const keys = Object.keys(dictionary);
     if(keys.length === 0) return []
+    console.log(keys)
     const comments = Comment.find({ "id" : { $in: keys } }).sort({ createdAt: 'desc' }) as unknown as Array<CommentSchemaInterface>
     return comments.map(comment => {
         return {
             id: comment.id,
             createdBy: getUserById( comment.createdBy),
-            comment: comment.comment,
+            comments: comment.comment,
             todoId: comment.todoId,
             createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
         }
     })
 }
 
-export function isCorrectPassword({ password, correctPassword } : { password: string, correctPassword: string | undefined }) {
+export function isCorrectPassword({ attemptPassword, correctPassword } : { attemptPassword: string, correctPassword: string | undefined }) {
     if(!correctPassword) throw new ApolloError('No User Found with Credentials Entered');
-    return bcrypt.compare(password, correctPassword);
+    return bcrypt.compare(attemptPassword, correctPassword);
 }

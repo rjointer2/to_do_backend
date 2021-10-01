@@ -13,23 +13,25 @@ import { Auth, UserPayload } from "../type";
 
 export async function addComment( _: never, args: TodoSchemaInterface, context: Auth ) { 
 
-    const { username, id }: UserPayload =  context.verify();
-    if( !id ) return null;
+    const { id, username } =  context.verify();
 
-    const comment = await Comment.create({ createdBy: args.createdBy, comment: args.comment, todo: args.todoId })
-    if(!comment) throw new ApolloError('Can not find user')
+    const comment = await Comment.create({ 
+        createdBy: args.createdBy, 
+        comment: args.comment, 
+        todoId: args.todoId 
+    });
 
-    // add dictionary to comment prop of the todo
+    if(!comment) throw new ApolloError('can not make comment under todo');
+
     const todo = await Todo.findById(comment.todoId) // this is the todo id 
-    if(!todo) throw new ApolloError('Can not find todo')
+    if(!todo) throw new ApolloError('Can not find todo when creating comment')
 
-    // key -> comment _id and value user _id
-    todo.comments[comment.id] = id;
+    todo.comments[comment._id] = id;
     console.log(`${username} added a commented`);
     await todo.save()
     console.log(comment);
     return {
-        _id: comment.id,
+        id: comment.id,
         createdBy: comment.createdBy,
         comment: comment.comment,
         todo: comment.todoId
@@ -45,7 +47,7 @@ export async function deleteComment( _: never, args: TodoSchemaInterface ) {
     if(!todo) throw new ApolloError('Todo not found...')
     // is in todo model find the comment prop and search for the 
     // comment id and delete the dictionary then the comment itself
-    delete todo.comments[comment.id]
+    delete todo.comments[comment._id]
     console.log(comment.id)
     await todo.save();
     // now delete the Comment 

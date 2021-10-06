@@ -16,6 +16,7 @@ exports.deleteTodo = exports.updateTodo = exports.likeTodo = exports.getTodoById
 const apollo_server_express_1 = require("apollo-server-express");
 const moment_1 = __importDefault(require("moment"));
 const helper_1 = require("../helper");
+const commentModel_1 = __importDefault(require("../models/commentModel"));
 const todoModel_1 = __importDefault(require("../models/todoModel"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const todos = (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
@@ -175,6 +176,8 @@ const deleteTodo = (_, args, context) => __awaiter(void 0, void 0, void 0, funct
     }
     delete user.todos[todo.id];
     user.markModified("todos");
+    const dictionary = Object.keys(user.comments);
+    yield commentModel_1.default.deleteMany({ "createdBy": { $in: dictionary } });
     yield user.save();
     return {
         id: todo.id,

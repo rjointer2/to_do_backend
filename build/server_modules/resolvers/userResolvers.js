@@ -18,6 +18,8 @@ const apollo_server_express_1 = require("apollo-server-express");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 // Models
 const userModel_1 = __importDefault(require("../models/userModel"));
+const todoModel_1 = __importDefault(require("../models/todoModel"));
+const commentModel_1 = __importDefault(require("../models/commentModel"));
 // helpers
 const helper_1 = require("../helper");
 function me(_, _args, context) {
@@ -149,12 +151,22 @@ const updateUser = (_, args, context) => __awaiter(void 0, void 0, void 0, funct
             }
         }
     }
-    console.log(user);
+    return {
+        id: user.id
+    };
 });
 exports.updateUser = updateUser;
-const deleteUser = (_, _args, context) => __awaiter(void 0, void 0, void 0, function* () {
-    /*
-        user like todos, and write comment
-    */
+const deleteUser = (_, args, context) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = context.verify();
+    const user = yield userModel_1.default.findById(id);
+    if (!user)
+        throw new apollo_server_express_1.ApolloError('Could find user when deleteing user, action exited');
+    if (!(yield (0, helper_1.isCorrectPassword)({ attemptPassword: args.password, correctPassword: user.password }))) {
+        throw new apollo_server_express_1.ApolloError('failed password check');
+    }
+    const todoKeys = Object.keys(user.todos);
+    yield commentModel_1.default.deleteMany({ "createdBy": id });
+    yield todoModel_1.default.deleteMany({ "id": { $in: todoKeys } });
+    yield userModel_1.default.deleteOne({ "id": user.id });
 });
 exports.deleteUser = deleteUser;

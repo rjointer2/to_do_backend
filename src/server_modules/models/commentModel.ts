@@ -4,7 +4,7 @@ import { Schema, model, Document } from 'mongoose';
 export interface CommentSchemaInterface extends Document {
     createdBy: string
     comment: { [index: string]: any }
-    todoId: string
+    todoID: string
     createdAt?: string
     id?: string
 }
@@ -17,7 +17,7 @@ const commentSchema = new Schema<CommentSchemaInterface>(
         comment: {
             type: String,
         },
-        todoId: {
+        todoID: {
             type: String,
         },
         

@@ -1,6 +1,6 @@
 
 import { todos, addTodo, likeTodo, getTodoById, updateTodo, deleteTodo, searchTodos } from '../resolvers/todoResolvers';
-import { me, sign, user, searchUsers, updateUser } from '../resolvers/userResolvers';
+import { me, sign, user, searchUsers, updateUser, deleteUser } from '../resolvers/userResolvers';
 import { addComment, deleteComment }  from '../resolvers/commentResolvers';
 
 let resolvers = {
@@ -15,6 +15,7 @@ let resolvers = {
         deleteComment,
         searchUsers,
         searchTodos,
+        deleteUser,
         updateUser,
         updateTodo,
         deleteTodo,

@@ -65,14 +65,15 @@ export async function getAllCommentsAssicotedWithTodoID( dictionary: object ) {
 
     const keys = Object.keys(dictionary);
     if(keys.length === 0) return []
-    console.log(keys)
-    const comments = Comment.find({ "id" : { $in: keys } }).sort({ createdAt: 'desc' }) as unknown as Array<CommentSchemaInterface>
+    console.log(keys);
+    const comments = await Comment.find({ "id" : { $in: keys } }).sort({ createdAt: 'desc' }) as unknown as Array<CommentSchemaInterface>
+    console.log(comments);
     return comments.map(comment => {
         return {
             id: comment.id,
             createdBy: getUserById( comment.createdBy),
-            comments: comment.comment,
-            todoId: comment.todoId,
+            comment: comment.comment,
+            todoID: comment.todoID,
             createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
         }
     })

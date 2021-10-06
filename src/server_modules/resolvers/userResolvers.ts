@@ -134,17 +134,25 @@ export const updateUser = async ( _: never, args: { username: string, email: str
             }
         }
     }
-    console.log(user)
+    return {
+        id: user.id
+    }
 }
 
-export const deleteUser = async ( _: never, _args: never, context: Auth ) => {
+export const deleteUser = async ( _: never, args: { password: string }, context: Auth ) => {
     const { id } = context.verify();
     const user = await User.findById(id);
 
     if(!user) throw new ApolloError('Could find user when deleteing user, action exited');
+
+    if(!await isCorrectPassword({ attemptPassword: args.password, correctPassword: user.password })) {
+        throw new ApolloError('failed password check')
+    }
     
     const todoKeys = Object.keys(user.todos);
     await Comment.deleteMany({ "createdBy": id })
     await Todo.deleteMany({ "id": { $in: todoKeys } })
+    await User.deleteOne({ "id": user.id })
+    console.log("user was delete")
     
 }

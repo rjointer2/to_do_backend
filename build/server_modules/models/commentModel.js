@@ -8,7 +8,7 @@ const commentSchema = new mongoose_1.Schema({
     comment: {
         type: String,
     },
-    todoId: {
+    todoID: {
         type: String,
     },
 }, { timestamps: true });

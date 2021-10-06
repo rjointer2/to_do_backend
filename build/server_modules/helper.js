@@ -79,13 +79,14 @@ function getAllCommentsAssicotedWithTodoID(dictionary) {
         if (keys.length === 0)
             return [];
         console.log(keys);
-        const comments = commentModel_1.default.find({ "id": { $in: keys } }).sort({ createdAt: 'desc' });
+        const comments = yield commentModel_1.default.find({ "id": { $in: keys } }).sort({ createdAt: 'desc' });
+        console.log(comments);
         return comments.map(comment => {
             return {
                 id: comment.id,
                 createdBy: (0, exports.getUserById)(comment.createdBy),
-                comments: comment.comment,
-                todoId: comment.todoId,
+                comment: comment.comment,
+                todoID: comment.todoID,
                 createdAt: (0, moment_1.default)(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
             };
         });

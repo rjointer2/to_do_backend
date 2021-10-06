@@ -57,7 +57,6 @@ const typeDefs = gql`
 
     type Mutation {
         
-        addTodo( subject: String!, dueDate: String! todo: String! ): Todo
         addComment( createdBy: String!, comment: String!, todoID: String! ): Comment
         deleteComment( id: String ): Comment
 
@@ -65,9 +64,11 @@ const typeDefs = gql`
         searchTodos( value: String! ): [Todo]
 
         likeTodo( id: String!, type: String! ): Todo
+        addTodo( subject: String!, dueDate: String! todo: String! ): Todo
         updateTodo( option: String!, id: String!, value: String! ): Todo
         deleteTodo( id: String! ): Todo
 
+        deleteUser( password: String! ): User
         updateUser( username: String, password: String, email: String, id: String! confirmPassword: String! ): User
         sign( username: String!, password: String!, email: String, type: String! ): Auth
     }

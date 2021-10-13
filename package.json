@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "node dist/server.js",
-    "build": "tsc && node dist/server.js",
+    "build": "tsc",
     "dev": "tsc && nodemon dist/server.js"
   },
   "dependencies": {

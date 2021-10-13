@@ -2,7 +2,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "tsc",
-    "dev": "tsc && nodemon dist/server.js",
+    "develop": "tsc && nodemon dist/server.js",
     "heroku-postbuild": "node dist/server.js"
   },
   "dependencies": {

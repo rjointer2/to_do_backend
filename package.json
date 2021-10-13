@@ -1,8 +1,7 @@
 {
   "scripts": {
-    "build": "tsc",
     "start": "node dist/server.js",
-    "postinstall": "npm run build",
+    "postinstall": "npm run start",
     "watch-node": "nodemon dist/server.js",
     "watch-ts": "tsc -w",
     "dev": "tsc & nodemon dist/server.js"

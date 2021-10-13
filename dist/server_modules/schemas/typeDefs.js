@@ -1,8 +1,8 @@
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // grab the module to create type definitions
 const { gql } = require('apollo-server-express');
-
-const typeDefs = gql`
+const typeDefs = gql `
 
     type Auth {
         token: String
@@ -52,6 +52,10 @@ const typeDefs = gql`
 
     type Mutation {
         
+<<<<<<< HEAD
+        addTodo( subject: String!, dueDate: String! todo: String! ): Todo
+=======
+>>>>>>> 847b939219323980387c644d310d871b6d5f7187
         addComment( createdBy: String!, comment: String!, todoID: String! ): Comment
         deleteComment( id: String ): Comment
 
@@ -69,5 +73,4 @@ const typeDefs = gql`
     }
 
 `;
-
-export default typeDefs;
+exports.default = typeDefs;

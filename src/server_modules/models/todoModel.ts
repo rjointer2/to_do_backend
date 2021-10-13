@@ -4,8 +4,8 @@ export interface TodoSchemaInterface {
     [index: string]: any
     completed: boolean
     subject: string
-    todo: object
-    likeBy: boolean
+    todo: string
+    likedBy: any
     dueDate: string
     createdBy: string
     comments: {[index: string]: any}
@@ -28,7 +28,6 @@ const todoSchema = new Schema(
         },
         likedBy: {
             type: Schema.Types.Mixed,
-            default: {},
             required: true,
         },
         dueDate: {

@@ -8,17 +8,18 @@ export interface UserSchema {
     password: string
     todos: object
     comments: object
-    friends: object
+    likedTodos: any
 }
 
 export interface UserSchemaDefinition {
+    [index: string]: any
     id: string
     username: string
     email: string
     password?: string
-    todos: object
+    todos: { [index: string]: any }
     comments: object
-    friends: object
+    likedTodos: {[index: string]: any}
 }
 
 const userSchema = new Schema<UserSchema>(
@@ -43,18 +44,20 @@ const userSchema = new Schema<UserSchema>(
             minlength: 5
         },
         todos: {
-            type: [Schema.Types.Mixed],
-            ref: 'Todo'
+            type: Schema.Types.Mixed,
+            required: true,
         },
         comments: {
-            type: [Schema.Types.Mixed],
-            ref: 'Comment'
+            type: Schema.Types.Mixed,
+            required: true,
         },
-        friends: {
-            type: [Schema.Types.Mixed],
-            ref: 'User'
+        likedTodos: {
+            type: Schema.Types.Mixed,
+            required: true,
         }
-    }
+        
+    },
+    { timestamps: true, minimize: false },
 );
 
 // set up pre-save middleware to create password
@@ -65,12 +68,6 @@ userSchema.pre('save', async function(next): Promise<void> {
     }
     next();
 });
-  
-// compare the incoming password with the hashed password
-userSchema.methods.isCorrectPassword = async function(password: string): Promise<boolean> {
-return bcrypt.compare(password, this.password);
-};
-
 
 const User = model<UserSchemaDefinition>('Users', userSchema);
 

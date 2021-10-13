@@ -5,7 +5,7 @@ const { gql } = require('apollo-server-express');
 const typeDefs = gql`
 
     type Auth {
-        token: String!
+        token: String
         user: User
     }
 
@@ -16,7 +16,7 @@ const typeDefs = gql`
         password: String!
         todos: [Todo]
         comments: [Comment]
-        friends: [User]
+        picture: String
     }
 
     type Comment {
@@ -37,25 +37,39 @@ const typeDefs = gql`
         dueDate: String!
         didUserLike: Boolean
         comments: [Comment]
+        createdAt: String!
     }
 
 
     type Query {
         me: User
+        user( id: String! ): User
         todos( offset: Int!, limit: Int! ): [Todo]
         getTodoById( id: String! ): Todo
+        getTodosById( id: String! ): [Todo]
         comments: [Comment]
     }
 
     type Mutation {
         
+<<<<<<< HEAD
         addTodo( subject: String!, dueDate: String! todo: String! ): Todo
+=======
+>>>>>>> 847b939219323980387c644d310d871b6d5f7187
         addComment( createdBy: String!, comment: String!, todoID: String! ): Comment
         deleteComment( id: String ): Comment
 
-        likeTodo( id: String!, type: String! ): Todo
+        searchUsers( value: String! ): [User]
+        searchTodos( value: String! ): [Todo]
 
-        sign( username: String!, password: String!, email: String, type: String! ): Auth
+        likeTodo( id: String!, type: String! ): Todo
+        addTodo( subject: String!, dueDate: String! todo: String! ): Todo
+        updateTodo( option: String!, id: String!, value: String! ): Todo
+        deleteTodo( id: String! ): Todo
+
+        deleteUser( password: String! ): User
+        updateUser( picture: String, username: String, password: String, email: String, confirmPassword: String ): User
+        sign( username: String, password: String, email: String, type: String! ): Auth
     }
 
 `;

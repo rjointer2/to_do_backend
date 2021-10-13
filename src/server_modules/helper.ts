@@ -8,43 +8,55 @@ import User, { UserSchemaDefinition } from './models/userModel';
 import moment from 'moment';
 import bcrypt from 'bcrypt';
 
-export async function getUserById( id: string ): Promise<any> {
-    const user = await User.findById(id);
-    if(!user) throw new ApolloError('Can not find user')
-    console.log(user.id)
+export const getUserById = async ( id: string ): Promise<any> => {
+    const user = await User.findById(id)
+    if(!user) return null;
     return {
-        id: user.id.toString()
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            todos: getTodosByUserId.bind(this, user.id),
+            comments: user?.comments,
+            picture: image(user.id)
     }
 }
 
-export async function getTodosByUserId( createdBy: string ): Promise<any> {
-    const todos = await Todo.find({ "id": createdBy}) as Array<TodoSchemaInterface> | null
+
+export const getTodosByUserId = async ( createdBy: string ): Promise<any> => {
+    const todos = await Todo.find({createdBy}) as Array<TodoSchemaInterface> | null
     if(!todos) throw new ApolloError(`Can not find todos when queried by user's id or no user was logged in...`);
-    return todos.map(todo => {
+    return todos.map((todo) => {
+        let liked: boolean = false;
+        if(todo.likedBy[createdBy]) liked = true;
         return {
+            didUserLike: liked,
             completed: todo.completed,
-            likedBy: getAllUsersThatLikedTodo.bind(todo.likedBy),
-            id: todo.id.toString(),
+            likedBy: getAllUsersThatLikedTodo(todo.likedBy),
+            id: todo.id,
             subject: todo.subject,
             todo: todo.todo,
-            createdBy: getUserById(todo.createdBy.toString()),
-            dueDate: todo.dueDate
+            createdAt: moment(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            picture: image(todo.createdBy),
+            createdBy: getUserById.bind(this, todo.createdBy),
+            dueDate: todo.dueDate,
+            comments: getAllCommentsAssicotedWithTodoID.bind(this, todo.comments)
         }
     })
 }
-
-export async function getAllUsersThatLikedTodo( likers: UserSchemaDefinition ) {
+export const getAllUsersThatLikedTodo = async ( likers: UserSchemaDefinition ): Promise<any> => {
 
     const keys = Object.keys(likers);
-    const users = await User.find({ 'username': { $in: keys } }).sort({ createdAt: 'desc' })
+    if(keys.length === 0) return []
+    
+    const users = await User.find({ 'id': { $in: keys } })
+
     return users.map(user => {
         return {
             id: user.id,
             email: user.email,
             username: user.username,
-            todos: getTodosByUserId.bind(user.id),
-            comments: user.comments,
-            friends: user.friends,
+            todos: getTodosByUserId.bind(this, user.id),
+            picture: image(user.id)
         }
     }) 
     
@@ -53,19 +65,26 @@ export async function getAllUsersThatLikedTodo( likers: UserSchemaDefinition ) {
 export async function getAllCommentsAssicotedWithTodoID( dictionary: object ) {
 
     const keys = Object.keys(dictionary);
-    const comments = Comment.find({ "_id" : { $in: keys } }).sort({ createdAt: 'desc' }) as unknown as Array<CommentSchemaInterface>
+    if(keys.length === 0) return []
+    console.log(keys);
+    const comments = await Comment.find({ "id" : { $in: keys } }).sort({ createdAt: 'desc' }) as unknown as Array<CommentSchemaInterface>
+    console.log(comments);
     return comments.map(comment => {
         return {
             id: comment.id,
-            createdBy: getUserById.bind( comment.createdBy),
+            createdBy: getUserById( comment.createdBy),
             comment: comment.comment,
-            todoId: comment.todoId,
-            createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
+            todoID: comment.todoID,
+            createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            picture: image(comment.createdBy)
         }
     })
 }
 
-export function isCorrectPassword({ password, correctPassword } : { password: string, correctPassword: string | undefined }) {
+export function isCorrectPassword({ attemptPassword, correctPassword } : { attemptPassword: string, correctPassword: string | undefined }) {
     if(!correctPassword) throw new ApolloError('No User Found with Credentials Entered');
-    return bcrypt.compare(password, correctPassword);
+    return bcrypt.compare(attemptPassword, correctPassword);
 }
+
+// endpoint for api
+export const image = (id: string) =>  `http://res.cloudinary.com/roodystorage/todo_images/${id}`

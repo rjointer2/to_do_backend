@@ -35,7 +35,8 @@ export default function authenicationMiddleware({ req, rep }: { req: RequestWith
             return { username: data.username, email: data.email, id: data.id }
         },
         endSession: function(): void {
-            req.header.authorization = "";
+            req.header.authorization = null
+            console.log(`The user's session ended...`);
         }
         
     }

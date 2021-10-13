@@ -1,5 +1,5 @@
 
-import { todos, addTodo, likeTodo, getTodoById, updateTodo, deleteTodo, searchTodos } from '../resolvers/todoResolvers';
+import { todos, addTodo, likeTodo, getTodoById, updateTodo, deleteTodo } from '../resolvers/todoResolvers';
 import { me, sign, user, searchUsers, updateUser, deleteUser } from '../resolvers/userResolvers';
 import { addComment, deleteComment }  from '../resolvers/commentResolvers';
 
@@ -14,7 +14,6 @@ let resolvers = {
     Mutation: {
         deleteComment,
         searchUsers,
-        searchTodos,
         deleteUser,
         updateUser,
         updateTodo,

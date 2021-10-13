@@ -8,6 +8,7 @@ export interface UserSchema {
     password: string
     todos: object
     comments: object
+    likedTodos: any
 }
 
 export interface UserSchemaDefinition {
@@ -18,6 +19,7 @@ export interface UserSchemaDefinition {
     password?: string
     todos: { [index: string]: any }
     comments: object
+    likedTodos: {[index: string]: any}
 }
 
 const userSchema = new Schema<UserSchema>(
@@ -43,14 +45,19 @@ const userSchema = new Schema<UserSchema>(
         },
         todos: {
             type: Schema.Types.Mixed,
-            ref: 'Todo'
+            required: true,
         },
         comments: {
-            type: {},
-            ref: 'Comment'
+            type: Schema.Types.Mixed,
+            required: true,
         },
-
-    }
+        likedTodos: {
+            type: Schema.Types.Mixed,
+            required: true,
+        }
+        
+    },
+    { timestamps: true, minimize: false },
 );
 
 // set up pre-save middleware to create password

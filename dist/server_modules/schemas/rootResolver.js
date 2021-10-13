@@ -13,7 +13,6 @@ let resolvers = {
     Mutation: {
         deleteComment: commentResolvers_1.deleteComment,
         searchUsers: userResolvers_1.searchUsers,
-        searchTodos: todoResolvers_1.searchTodos,
         deleteUser: userResolvers_1.deleteUser,
         updateUser: userResolvers_1.updateUser,
         updateTodo: todoResolvers_1.updateTodo,

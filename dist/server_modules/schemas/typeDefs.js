@@ -10,7 +10,7 @@ const typeDefs = gql `
     }
 
     type Auth {
-        token: ID!
+        token: String
         user: User
     }
 
@@ -21,7 +21,7 @@ const typeDefs = gql `
         password: String!
         todos: [Todo]
         comments: [Comment]
-        friends: [User]
+        picture: String
     }
 
     type Comment {
@@ -69,8 +69,8 @@ const typeDefs = gql `
         deleteTodo( id: String! ): Todo
 
         deleteUser( password: String! ): User
-        updateUser( username: String, password: String, email: String, id: String! confirmPassword: String! ): User
-        sign( username: String!, password: String!, email: String, type: String! ): Auth
+        updateUser( picture: String, username: String, password: String, email: String, confirmPassword: String ): User
+        sign( username: String, password: String, email: String, type: String! ): Auth
     }
 
 `;

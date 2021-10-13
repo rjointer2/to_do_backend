@@ -2,7 +2,7 @@
 import { ApolloError, AuthenticationError } from 'apollo-server-express';
 import moment from 'moment';
 
-import { getAllCommentsAssicotedWithTodoID, getAllUsersThatLikedTodo, getTodosByUserId, getUserById } from '../helper';
+import { getAllCommentsAssicotedWithTodoID, getAllUsersThatLikedTodo, getTodosByUserId, getUserById, image } from '../helper';
 import Comment from '../models/commentModel';
 import Todo, { TodoSchemaInterface } from '../models/todoModel';
 import User from '../models/userModel';
@@ -30,28 +30,6 @@ export const todos = async ( _: never, args: { offset: number, limit: number }, 
     })
 }
 
-export const searchTodos = async ( _: never, args: { value: string }, context: Auth ) => {
-    const { id } = context.verify() as UserPayload;
-    const todos = await Todo.find({ "subject": { $regex: args.value } });
-    if(!todos) throw new ApolloError('Server error when querying all Todos...');
-    return todos.map(todo => {
-        return {
-            id: todo.id.toString(),
-            likedBy: getAllUsersThatLikedTodo(todo.likedBy), 
-            subject: todo.subject,
-            completed: todo.completed,
-            todo: todo.todo,
-            createdBy: getUserById.bind(this, todo.createdBy),
-            dueDate: todo.dueDate,
-            didUserLike: todo.likedBy[id] ? true : false,
-            createdAt: moment(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
-            comments: getAllCommentsAssicotedWithTodoID(todo.comments) 
-        }
-    })
-}
-
-
-
 export async function addTodo( _: never, args: TodoSchemaInterface, context: Auth ) {
     const { id } = context.verify()
     console.log(args)
@@ -72,12 +50,14 @@ export async function addTodo( _: never, args: TodoSchemaInterface, context: Aut
     }
 
     const todo = await Todo.create(newTodo);
-    console.log(todo)
+    console.log(todo.id)
     if(!todo) throw new ApolloError('Cannot make a todo...');
+    console.log(user)
 
     user.todos[todo.id] = todo.todo;
     user.markModified("todos");
     await user.save()
+
 
     return todo;
 }
@@ -98,6 +78,7 @@ export const getTodoById = async (_: never, args: TodoSchemaInterface, context: 
             completed: todo.completed,
             todo: todo.todo,
             createdBy: getUserById.bind(this, todo.createdBy),
+            picture: image(todo.createdBy),
             dueDate: todo.dueDate,
             didUserLike: liked,
             createdAt: moment(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
@@ -112,6 +93,12 @@ export const getTodoById = async (_: never, args: TodoSchemaInterface, context: 
 export async function likeTodo(  _: never, args: { type: string, id: TodoSchemaInterface }, context: Auth ) {
 
     const { username, id } =  context.verify();
+    const user = await User.findById(id);
+
+    if(!user) { 
+        console.log("No user found when liking todo...")
+        throw new ApolloError("no user found when liking todo.. ")
+    }
 
     try{ 
         if(id.includes("No")) throw new ApolloError('No User is Logged In!');
@@ -119,18 +106,22 @@ export async function likeTodo(  _: never, args: { type: string, id: TodoSchemaI
         if(!todo) throw new ApolloError('Can not find todo with querying likes')
 
         if( args.type === 'like' ) {
-            todo.likedBy[id] = todo.id;
+            todo.likedBy[id] = username;
             console.log(`${username} liked ${todo.createdBy}'s post -> ${todo.subject}`);
             console.log(todo.likedBy)
+            user.likedTodos[todo.id] = todo.subject
         }
 
         if( args.type === 'unlike' ) {
             delete todo.likedBy[id]
+            delete user.likedTodos[todo.id]
             console.log(`${username} unliked ${todo.createdBy}'s post -> ${todo.subject}`);
         }
 
         todo.markModified("likedBy")
-        await todo.save()
+        user.markModified("likedTodos")
+        await todo.save();
+        await user.save();
 
     } catch(error) {
         console.log(error);

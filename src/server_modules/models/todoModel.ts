@@ -5,7 +5,7 @@ export interface TodoSchemaInterface {
     completed: boolean
     subject: string
     todo: string
-    likeBy: boolean
+    likedBy: any
     dueDate: string
     createdBy: string
     comments: {[index: string]: any}

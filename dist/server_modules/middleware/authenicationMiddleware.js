@@ -35,7 +35,8 @@ function authenicationMiddleware({ req, rep }) {
             return { username: data.username, email: data.email, id: data.id };
         },
         endSession: function () {
-            req.header.authorization = "";
+            req.header.authorization = null;
+            console.log(`The user's session ended...`);
         }
     };
 }

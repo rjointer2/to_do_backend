@@ -1,21 +1,29 @@
 {
   "scripts": {
-    "build": "build/server.js",
-    "server": "tsc && node build/server.js"
+    "start": "node dist/server.js",
+    "postinstall": "tsc",
+    "watch-node": "nodemon dist/server.js",
+    "watch-ts": "tsc -w",
+    "dev": "tsc & nodemon dist/server.js"
   },
   "dependencies": {
     "@types/express": "^4.17.13",
     "@types/jsonwebtoken": "^8.5.5",
     "apollo-server-express": "^3.3.0",
     "bcrypt": "^5.0.1",
+    "cloudinary": "^1.27.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "graphql": "^15.5.1",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.1",
-    "mongoose": "^6.0.2"
+    "mongoose": "^6.0.2",
+    "nodemon": "^2.0.13"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0"
+  },
+  "engines": {
+    "node": "14.17.2."
   }
 }

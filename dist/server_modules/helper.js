@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isCorrectPassword = exports.getAllCommentsAssicotedWithTodoID = exports.getAllUsersThatLikedTodo = exports.getTodosByUserId = exports.getUserById = void 0;
+exports.image = exports.isCorrectPassword = exports.getAllCommentsAssicotedWithTodoID = exports.getAllUsersThatLikedTodo = exports.getTodosByUserId = exports.getUserById = void 0;
 // models 
 const todoModel_1 = __importDefault(require("../server_modules/models/todoModel"));
 const commentModel_1 = __importDefault(require("../server_modules/models/commentModel"));
@@ -30,7 +30,7 @@ const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
         username: user.username,
         todos: exports.getTodosByUserId.bind(this, user.id),
         comments: user === null || user === void 0 ? void 0 : user.comments,
-        friends: user === null || user === void 0 ? void 0 : user.friends,
+        picture: (0, exports.image)(user.id)
     };
 });
 exports.getUserById = getUserById;
@@ -50,6 +50,7 @@ const getTodosByUserId = (createdBy) => __awaiter(void 0, void 0, void 0, functi
             subject: todo.subject,
             todo: todo.todo,
             createdAt: (0, moment_1.default)(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            picture: (0, exports.image)(todo.createdBy),
             createdBy: exports.getUserById.bind(this, todo.createdBy),
             dueDate: todo.dueDate,
             comments: getAllCommentsAssicotedWithTodoID.bind(this, todo.comments)
@@ -68,7 +69,7 @@ const getAllUsersThatLikedTodo = (likers) => __awaiter(void 0, void 0, void 0, f
             email: user.email,
             username: user.username,
             todos: exports.getTodosByUserId.bind(this, user.id),
-            //comments: user.comments,
+            picture: (0, exports.image)(user.id)
         };
     });
 });
@@ -87,7 +88,8 @@ function getAllCommentsAssicotedWithTodoID(dictionary) {
                 createdBy: (0, exports.getUserById)(comment.createdBy),
                 comment: comment.comment,
                 todoID: comment.todoID,
-                createdAt: (0, moment_1.default)(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
+                createdAt: (0, moment_1.default)(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+                picture: (0, exports.image)(comment.createdBy)
             };
         });
     });
@@ -99,3 +101,6 @@ function isCorrectPassword({ attemptPassword, correctPassword }) {
     return bcrypt_1.default.compare(attemptPassword, correctPassword);
 }
 exports.isCorrectPassword = isCorrectPassword;
+// endpoint for api
+const image = (id) => `http://res.cloudinary.com/roodystorage/todo_images/${id}`;
+exports.image = image;

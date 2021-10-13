@@ -17,7 +17,7 @@ export const getUserById = async ( id: string ): Promise<any> => {
             username: user.username,
             todos: getTodosByUserId.bind(this, user.id),
             comments: user?.comments,
-            friends: user?.friends,
+            picture: image(user.id)
     }
 }
 
@@ -36,6 +36,7 @@ export const getTodosByUserId = async ( createdBy: string ): Promise<any> => {
             subject: todo.subject,
             todo: todo.todo,
             createdAt: moment(todo.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            picture: image(todo.createdBy),
             createdBy: getUserById.bind(this, todo.createdBy),
             dueDate: todo.dueDate,
             comments: getAllCommentsAssicotedWithTodoID.bind(this, todo.comments)
@@ -55,7 +56,7 @@ export const getAllUsersThatLikedTodo = async ( likers: UserSchemaDefinition ): 
             email: user.email,
             username: user.username,
             todos: getTodosByUserId.bind(this, user.id),
-            //comments: user.comments,
+            picture: image(user.id)
         }
     }) 
     
@@ -74,7 +75,8 @@ export async function getAllCommentsAssicotedWithTodoID( dictionary: object ) {
             createdBy: getUserById( comment.createdBy),
             comment: comment.comment,
             todoID: comment.todoID,
-            createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a")
+            createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
+            picture: image(comment.createdBy)
         }
     })
 }
@@ -83,3 +85,6 @@ export function isCorrectPassword({ attemptPassword, correctPassword } : { attem
     if(!correctPassword) throw new ApolloError('No User Found with Credentials Entered');
     return bcrypt.compare(attemptPassword, correctPassword);
 }
+
+// endpoint for api
+export const image = (id: string) =>  `http://res.cloudinary.com/roodystorage/todo_images/${id}`

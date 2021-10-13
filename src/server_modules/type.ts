@@ -2,7 +2,7 @@
 export interface Auth {
     authenticate: ({ username, email, id } : { username: string, email: string, id: string }) => string
     verify: () => { username: string, email: string, id: string }
-    endSession: Function
+    endSession: () => void
 }
 
 export interface UserPayload {

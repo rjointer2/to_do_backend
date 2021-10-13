@@ -36,13 +36,17 @@ const userSchema = new mongoose_1.Schema({
     },
     todos: {
         type: mongoose_1.Schema.Types.Mixed,
-        ref: 'Todo'
+        required: true,
     },
     comments: {
-        type: {},
-        ref: 'Comment'
+        type: mongoose_1.Schema.Types.Mixed,
+        required: true,
     },
-});
+    likedTodos: {
+        type: mongoose_1.Schema.Types.Mixed,
+        required: true,
+    }
+}, { timestamps: true, minimize: false });
 // set up pre-save middleware to create password
 userSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {

@@ -20,6 +20,7 @@ export const me = async ( _: never, _args: never, context: Auth ) => {
     const { id, username }: UserPayload = context.verify();
     const user = await User.findById(id);
     if(!user) throw new AuthenticationError('Authentican Error! You must be logged in!');
+    console.log(image(id))
 
     return {
         id: user.id,

@@ -1,5 +1,5 @@
 
-import { ApolloError, AuthenticationError } from 'apollo-server-express';
+import { ApolloError } from 'apollo-server-express';
 import moment from 'moment';
 
 import { getAllCommentsAssicotedWithTodoID, getAllUsersThatLikedTodo, getTodosByUserId, getUserById, image } from '../helper';
@@ -30,7 +30,7 @@ export const todos = async ( _: never, args: { offset: number, limit: number }, 
     })
 }
 
-export async function addTodo( _: never, args: TodoSchemaInterface, context: Auth ) {
+export const addTodo = async ( _: never, args: TodoSchemaInterface, context: Auth ) => {
     const { id } = context.verify()
     console.log(args)
     const newTodo = {
@@ -90,7 +90,7 @@ export const getTodoById = async (_: never, args: TodoSchemaInterface, context: 
     }
 }
 
-export async function likeTodo(  _: never, args: { type: string, id: TodoSchemaInterface }, context: Auth ) {
+export const likeTodo = async (  _: never, args: { type: string, id: TodoSchemaInterface }, context: Auth ) => {
 
     const { username, id } =  context.verify();
     const user = await User.findById(id);
@@ -115,6 +115,7 @@ export async function likeTodo(  _: never, args: { type: string, id: TodoSchemaI
         if( args.type === 'unlike' ) {
             delete todo.likedBy[id]
             delete user.likedTodos[todo.id]
+            console.log(todo.likedBy)
             console.log(`${username} unliked ${todo.createdBy}'s post -> ${todo.subject}`);
         }
 

@@ -30,7 +30,7 @@ export const me = async ( _: never, _args: never, context: Auth ) => {
     }
 }
 
-export async function user ( _: never, args: { id: string }, context: Auth ) {
+export const user = async ( _: never, args: { id: string }, context: Auth ) => {
 
 
     const user = await User.findById(args.id);
@@ -60,7 +60,7 @@ export const searchUsers = async ( _: never, args: { value: string } ) => {
     })
 }
 
-export async function sign( _: never, args: { type: string, password: string, username: string, email: string }, context: Auth ) {
+export const sign = async ( _: never, args: { type: string, password: string, username: string, email: string }, context: Auth ) => {
     console.log(args)
     if(args.type === 'sign_out') {
         context.endSession();

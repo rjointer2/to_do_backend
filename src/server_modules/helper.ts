@@ -43,14 +43,21 @@ export const getTodosByUserId = async ( createdBy: string ): Promise<any> => {
         }
     })
 }
-export const getAllUsersThatLikedTodo = async ( likers: UserSchemaDefinition ): Promise<any> => {
+export const getAllUsersThatLikedTodo = async ( likers: UserSchemaDefinition ) => {
 
     const keys = Object.keys(likers);
     if(keys.length === 0) return []
+    console.log(keys)
     
-    const users = await User.find({ 'id': { $in: keys } })
+    const users = await User.find({ '_id': { $in: keys } })
+    console.log(users)
 
-    return users.map(user => {
+    if(!users) {
+        console.log('No users found when querying users the liked todo')
+        throw new ApolloError('No users found when querying users the liked todo')
+    }
+
+    return users.map((user) => {
         return {
             id: user.id,
             email: user.email,
@@ -72,11 +79,10 @@ export async function getAllCommentsAssicotedWithTodoID( dictionary: object ) {
     return comments.map(comment => {
         return {
             id: comment.id,
-            createdBy: getUserById( comment.createdBy),
+            createdBy: getUserById(comment.createdBy),
             comment: comment.comment,
             todoID: comment.todoID,
             createdAt: moment(comment.createdAt).format("YYYY-MM-DD hh:mm:ss a"),
-            picture: image(comment.createdBy)
         }
     })
 }
@@ -87,4 +93,4 @@ export function isCorrectPassword({ attemptPassword, correctPassword } : { attem
 }
 
 // endpoint for api
-export const image = (id: string) =>  `http://res.cloudinary.com/roodystorage/todo_images/${id}`
+export const image = (id: string) => `http://res.cloudinary.com/roodystorage/todo_images/${id}`

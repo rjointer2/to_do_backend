@@ -93,4 +93,4 @@ export function isCorrectPassword({ attemptPassword, correctPassword } : { attem
 }
 
 // endpoint for api
-export const image = (id: string) => `http://res.cloudinary.com/roodystorage/todo_images/${id}`
+export const image = (id: string) => `https://res.cloudinary.com/roodystorage/todo_images/${id}`
